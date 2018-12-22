@@ -1,9 +1,12 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-require_once(APPPATH.'/libraries/REST_Controller.php');
-use Restserver\Libraries\REST_Controller;
 
-class Piso extends REST_Controller {
+require_once(APPPATH.'/libraries/REST_Controller.php');
+use Restserver\libraries\REST_Controller;
+
+class Usuario extends REST_Controller
+{
+	
 	public function __construct()
 	{
 		header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
@@ -12,13 +15,5 @@ class Piso extends REST_Controller {
 
 		parent::__construct();
 		$this->load->database();
-	}
-
-	public function index(){
-	}
-
-	public function pisos_get($module_id){
-		$query = $this->db->query("SELECT floor_id FROM aulalist WHERE module_id='".$module_id."'");
-			$this->response($query->result());
 	}
 }
