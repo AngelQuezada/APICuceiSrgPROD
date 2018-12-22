@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require_once(APPPATH.'/libraries/REST_Controller.php');
 use Restserver\libraries\REST_Controller;
 
-class Usuario extends REST_Controller
+class Personal extends REST_Controller
 {
 	
 	public function __construct()
@@ -17,8 +17,8 @@ class Usuario extends REST_Controller
 	}
 	public function index(){
 	}
-	public function usuarios_get($correo){
-		$query = $this->db->query("SELECT id FROM usuario WHERE correo='".$correo."'");
+	public function personal_get($correo){
+		$query = $this->db->query("SELECT nombre,a_paterno,a_materno FROM personal WHERE correo='".$correo."'");
 			$this->response($query->result());
 	}
 }
