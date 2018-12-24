@@ -18,13 +18,19 @@ class Reporte extends REST_Controller {
 
 	public function nuevo_post(){
 		//SI NO SE ENVIA TOKEN
-		
-		if($this->post('token') === null){
+		$token = $this->post('token');
+		$idUsuario = $this->post('idUsuario');
+		if($token === "" || $idUsuario=== ""){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'No Autorizado');
-			$this->reponse($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
+		//VALIDAR SI EL TOKEN ENVIADO CORRESPONDE AL ID DEL USUARIO QUE SOLICITA
+		$respuesta = array('error' => FALSE,
+								'mensaje' => 'Se envio token e id del usuario ');
+		$this->response($respuesta);
+		/*
 		$ubicacionServicio = "'".$this->post('modulo')."' '".$this->post('piso')."' '".$this->post('aula')."'";
 		//OBTENER ID Y NOMBRE A PARTIR DEL CORREO DADO
 		$correo = $this->post('correo');
@@ -37,6 +43,8 @@ class Reporte extends REST_Controller {
 			$aPaterno = $key['a_paterno'];
 			$aMaterno = $key['a_materno'];
 		}
+		*/
+
 /*
 		$datos = array('recibe' => $this->post('recibe'),
 					   'nombre' => $nombre,
