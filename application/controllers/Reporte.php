@@ -72,10 +72,13 @@ class Reporte extends REST_Controller {
 		//OBTENER EL ULTIMO FOLIO REGISTRADO
 		$ultimoFolio = $this->db->insert_id();
 		$this->db->reset_query();
+
 		//PREPARAN LOS DATOS PARA INSERTAR EN LA TABLA STATUSREPORTE
-		$datosEstatusReporte = array('idUsuario' => $id, 
-									 'idStatus' => '1',
-									 'folio', $ultimoFolio);
+		$idStatus = "1";
+		$datosEstatusReporte = array('id' => null,
+									 'idUsuario' => $id,
+									 'idStatus' => $idStatus,
+									 'folio' => $ultimoFolio);
 		$this->db->insert('statusreporte',$datosEstatusReporte);
 
 		//SE ENVIA LA RESPUESTA
@@ -140,6 +143,7 @@ class Reporte extends REST_Controller {
 		$this->db->insert('reportemanten',$datos);
 		//OBTENER EL ULTIMO FOLIO REGISTRADO
 		$ultimoFolio = $this->db->insert_id();
+		$this->response($ultimoFolio);
 		$this->db->reset_query();
 		//PREPARAN LOS DATOS PARA INSERTAR EN LA TABLA STATUSREPORTE
 		$datosEstatusReporte = array('idUsuario' => $id, 
