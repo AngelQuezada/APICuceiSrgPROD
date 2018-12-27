@@ -21,4 +21,8 @@ class Usuario extends REST_Controller
 		$query = $this->db->query("SELECT id FROM usuario WHERE correo='".$correo."'");
 			$this->response($query->result());
 	}
+	public function totalusuarios_get(){
+		$query = $this->db->query('SELECT * FROM usuario');
+		$this->response($query->num_rows());
+	}
 }

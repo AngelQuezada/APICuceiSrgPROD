@@ -40,11 +40,18 @@ class Reporte extends REST_Controller {
 		}
 		//AQUI YA ESTA VALIDADO EL USUARIO
 		$this->db->reset_query();
-		//OBTENER ID Y NOMBRE A PARTIR DEL CORREO DEL USUARIO DADO
 		$correo = $this->post('correo');
+		//OBTENER ID Y NOMBRE A PARTIR DEL CORREO DEL USUARIO DADO
+		//VALIDAR A SU VEZ EL CORREO SEA VALIDO
 		$this->db->select('id,nombre,a_paterno,a_materno');
 		$this->db->where('correo',$correo);
 		$query = $this->db->get('usuario')->result_array();
+		if (!$query) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El correo dado no esta registrado');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
 
 		foreach ($query as $key) {
 				   $id = $key['id'];
@@ -64,8 +71,9 @@ class Reporte extends REST_Controller {
 					   'telefono' => $this->post('telefono'),
 					   'area_solicitante' => $this->post('area'),
 					   'ubicacion_servicio' => $ubicacionServicio,
-					   'descripcion_servicio' => 'Descripcion Problema',
-					   'descripcion_problema' => $this->post('option'),
+					   'anotacion_extra' => $this->post('anotacionExtra'),
+					   'descripcion_servicio' => $this->post('option'),
+					   'descripcion_problema' => $this->post('descripcionProblema'),
 					   'idUsuario' => $id
 					);
 		$this->db->insert('reportemanten',$datos);
@@ -157,5 +165,21 @@ class Reporte extends REST_Controller {
 							'folio' => $ultimoFolio);
 
 		$this->response($respuesta);
+	}
+	public function nuevos_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 1');
+		$this->response($query->num_rows());
+	}
+	public function atender_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 2');
+		$this->response($query->num_rows());
+	}
+	public function finalizados_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 3');
+		$this->response($query->num_rows());
+	}
+	public function cancelados_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
+		$this->response($query->num_rows());
 	}
 }
