@@ -77,6 +77,11 @@ class Personal extends REST_Controller
 		$this->response($respuesta);
 	}
 	public function empleado_get($correo){
+		if ($correo === null) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No se envio correo');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		}
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
 		$query = $this->db->get('personal');
