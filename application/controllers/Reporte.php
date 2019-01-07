@@ -182,4 +182,10 @@ class Reporte extends REST_Controller {
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
 		$this->response($query->num_rows());
 	}
+	public function reportenpp_get($aPaterno,$aMaterno,$nombre,$folio){
+		$this->db->select('*');
+		$this->db->where('a_paterno',$aPaterno)->or_where('a_materno',$aMaterno)->or_where('nombre',$nombre)->or_where('folio',$folio);
+		$query = $this->db->get('reportemanten')->result();
+		$this->response($query);
+	}
 }
