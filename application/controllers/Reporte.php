@@ -96,6 +96,7 @@ class Reporte extends REST_Controller {
 
 		$this->response($respuesta);
 	}
+	
 	public function nuevor_post(){
 		//SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
@@ -186,6 +187,24 @@ class Reporte extends REST_Controller {
 		$this->db->select('*');
 		$this->db->where('a_paterno',$aPaterno)->or_where('a_materno',$aMaterno)->or_where('nombre',$nombre)->or_where('folio',$folio);
 		$query = $this->db->get('reportemanten')->result();
+		if(empty($query)){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No hay resultados');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->response($query);
+	}
+	public function reporteindpp_get($folio){
+		$this->db->select('*');
+		$this->db->where('folio',$folio);
+		$query = $this->db->get('reportemanten')->result();
+		if(empty($query)){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No hay resultados');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
 		$this->response($query);
 	}
 }
