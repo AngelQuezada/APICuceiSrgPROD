@@ -96,7 +96,7 @@ class Reporte extends REST_Controller {
 
 		$this->response($respuesta);
 	}
-	
+
 	public function nuevor_post(){
 		//SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
@@ -155,7 +155,7 @@ class Reporte extends REST_Controller {
 		$this->response($ultimoFolio);
 		$this->db->reset_query();
 		//PREPARAN LOS DATOS PARA INSERTAR EN LA TABLA STATUSREPORTE
-		$datosEstatusReporte = array('idUsuario' => $id, 
+		$datosEstatusReporte = array('idUsuario' => $id,
 									 'idStatus' => '1',
 									 'folio' => $ultimoFolio);
 		$this->db->insert('statusreporte',$datosEstatusReporte);
@@ -206,5 +206,56 @@ class Reporte extends REST_Controller {
 			return;
 		}
 		$this->response($query);
+	}
+	public function modreporte_post(){
+		$token = $this->post('token');
+		$folio = $this->post('folio');
+		$fechaRecepcion = $this->post('fecha-recepcion');
+		$fechaAsignacion = $this->post('fecha-asignacion');
+		$fechaReparacion = $this->post('fecha-reparacion');
+		if (empty($token)) {
+			$respuesta = array('error' => TRUE,
+												'mensaje' => 'No Autorizado.');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
+		if (!empty($fechaRecepcion) && empty($fechaAsignacion) && !empty($fechaReparacion)) {
+			$respuesta = array('error' => TRUE,
+												'mensaje' => 'Debe haber fecha de Asignación antes.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		if (empty($fechaRecepcion) && empty($fechaAsignacion) && empty($fechaReparacion)) {
+			$respuesta = array('error' => TRUE,
+												'mensaje' => 'No se realizó ningun cambio.' );
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		if (empty($fechaRecepcion) && !empty($fechaAsignacion)) {
+			$respuesta = array('error' => TRUE,
+												'mensaje' => 'Debe existir fecha de recepción antes de asignar una.' );
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		if (empty($fechaRecepcion) && !empty($fechaReparacion)) {
+			$respuesta = array('error' => TRUE,
+												'mensaje' => 'Debe haber fecha de recepcion antes de asignar.' );
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		if (empty($fechaAsignacion) && !empty($fechaReparacion)) {
+			$respuesta = array('error' => TRUE,
+												'mensaje' => 'Debe haber fecha de asignacion antes de asignar.' );
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		 $condiciones = array('fecha_recepcion' => $fechaRecepcion,
+	  								'fecha_asignacion' => $fechaAsignacion,
+										'fecha_reparacion' => $fechaReparacion);
+		$this->db->where('folio',$folio);
+		$resultado = $this->db->update('reportemanten',$condiciones);
+		$respuesta = array('error' => FALSE,
+						   'mensaje' => 'Reporte Actualizado Correctamente');
+		$this->response($respuesta);
 	}
 }
