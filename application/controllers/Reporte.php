@@ -213,15 +213,29 @@ class Reporte extends REST_Controller {
 		$fechaRecepcion = $this->post('fecha-recepcion');
 		$fechaAsignacion = $this->post('fecha-asignacion');
 		$fechaReparacion = $this->post('fecha-reparacion');
+		
+		$this->db->select('idStatus');
+		$this->db->where('folio',$folio);
+		$query = $this->db->get('statusreporte')->result_array();
+		foreach ($query as $key) {
+			$id = $key['idStatus'];
+		 }
+		 if($id == '4'){
+			$respuesta = array('error' => TRUE,
+			'mensaje' => 'Ya fue cancelado, no se puede modificar');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		 }
+
 		if (empty($token)) {
 			$respuesta = array('error' => TRUE,
-												'mensaje' => 'No Autorizado.');
+								'mensaje' => 'No Autorizado.');
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
 		if (!empty($fechaRecepcion) && empty($fechaAsignacion) && !empty($fechaReparacion)) {
 			$respuesta = array('error' => TRUE,
-												'mensaje' => 'Debe haber fecha de Asignación antes.');
+								'mensaje' => 'Debe haber fecha de Asignación antes.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -233,19 +247,19 @@ class Reporte extends REST_Controller {
 		}
 		if (empty($fechaRecepcion) && !empty($fechaAsignacion)) {
 			$respuesta = array('error' => TRUE,
-												'mensaje' => 'Debe existir fecha de recepción antes de asignar una.' );
+								'mensaje' => 'Debe existir fecha de recepción antes de asignar una.' );
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
 		if (empty($fechaRecepcion) && !empty($fechaReparacion)) {
 			$respuesta = array('error' => TRUE,
-												'mensaje' => 'Debe haber fecha de recepcion antes de asignar.' );
+								'mensaje' => 'Debe haber fecha de recepcion antes de asignar.' );
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
 		if (empty($fechaAsignacion) && !empty($fechaReparacion)) {
 			$respuesta = array('error' => TRUE,
-												'mensaje' => 'Debe haber fecha de asignacion antes de asignar.' );
+								'mensaje' => 'Debe haber fecha de asignacion antes de asignar.' );
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -256,6 +270,31 @@ class Reporte extends REST_Controller {
 		$resultado = $this->db->update('reportemanten',$condiciones);
 		$respuesta = array('error' => FALSE,
 						   'mensaje' => 'Reporte Actualizado Correctamente');
+		$this->response($respuesta);
+	}
+
+	public function cancelar_post(){
+		$token = $this->post('token');
+		$folio = $this->post('folio');
+
+		$this->db->select('idStatus');
+		$this->db->where('folio',$folio);
+		$query = $this->db->get('statusreporte')->result_array();
+		foreach ($query as $key) {
+			$id = $key['idStatus'];
+		 }
+		 if($id == '4'){
+			$respuesta = array('error' => TRUE,
+			'mensaje' => 'Ya fue cancelado');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		 }
+		
+		$condiciones = array('idStatus' => '4');
+		$this->db->where('folio',$folio);
+		$resultado = $this->db->update('statusreporte',$condiciones);
+		$respuesta = array('error' => FALSE,
+						   'mensaje' => 'Reporte Mandado a Cancelados');
 		$this->response($respuesta);
 	}
 }
