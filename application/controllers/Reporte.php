@@ -294,7 +294,7 @@ class Reporte extends REST_Controller {
 		$this->db->where('folio',$folio);
 		$resultado = $this->db->update('statusreporte',$condiciones);
 		$respuesta = array('error' => FALSE,
-						   'mensaje' => 'Reporte Mandado a Cancelados');
+						   'mensaje' => 'Se ha Cancelado correctamente el reporte');
 		$this->response($respuesta);
 	}
 }
