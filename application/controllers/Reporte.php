@@ -297,4 +297,21 @@ class Reporte extends REST_Controller {
 						   'mensaje' => 'Se ha Cancelado correctamente el reporte');
 		$this->response($respuesta);
 	}
+
+	public function reportenuevos_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 1');
+		$this->response($query->result());
+	}
+	public function reporteatender_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 2');
+		$this->response($query->result());
+	}
+	public function reportefinalizados_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 3');
+		$this->response($query->result());
+	}
+	public function reportecancelados_get(){
+		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
+		$this->response($query->result());
+	}
 }
