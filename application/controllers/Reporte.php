@@ -175,9 +175,10 @@ class Reporte extends REST_Controller {
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 2');
 		$this->response($query->num_rows());
 	}
-	public function finalizados_get(){
+	public function finalizado_get(){
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 3');
-		$this->response($query->num_rows());
+		$cant = $query->num_rows();
+		$this->response($cant);
 	}
 	public function cancelados_get(){
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
@@ -213,6 +214,16 @@ class Reporte extends REST_Controller {
 		$fechaRecepcion = $this->post('fecha-recepcion');
 		$fechaAsignacion = $this->post('fecha-asignacion');
 		$fechaReparacion = $this->post('fecha-reparacion');
+		if(empty($fechaRecepcion)){
+			$fechaRecepcion = null;
+		}
+		if(empty($fechaAsignacion)){
+			$fechaAsignacion = null;
+		}
+		if(empty($fechaReparacion)){
+			$fechaReparacion = null;
+		}
+		
 		
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
@@ -263,14 +274,51 @@ class Reporte extends REST_Controller {
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
-		 $condiciones = array('fecha_recepcion' => $fechaRecepcion,
-	  								'fecha_asignacion' => $fechaAsignacion,
-										'fecha_reparacion' => $fechaReparacion);
-		$this->db->where('folio',$folio);
-		$resultado = $this->db->update('reportemanten',$condiciones);
-		$respuesta = array('error' => FALSE,
-						   'mensaje' => 'Reporte Actualizado Correctamente');
-		$this->response($respuesta);
+		//ESTATUS SOLICITUD 1
+		if(!empty($fechaRecepcion) && empty($fechaAsignacion) && empty($fechaReparacion)){
+			$condiciones = array('fecha_recepcion' => $fechaRecepcion,
+			'fecha_asignacion' => $fechaAsignacion,
+			'fecha_reparacion' => $fechaReparacion);
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('reportemanten',$condiciones);
+			$respuesta = array('error' => FALSE,
+			'mensaje' => 'Reporte Actualizado Correctamente');
+			$this->response($respuesta);
+			return;
+		}
+		//ESTATUS ASIGNADO 2
+		if(!empty($fechaRecepcion) && !empty($fechaAsignacion) && empty($fechaReparacion)){
+			$condiciones = array('fecha_recepcion' => $fechaRecepcion,
+			'fecha_asignacion' => $fechaAsignacion,
+			'fecha_reparacion' => $fechaReparacion);
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('reportemanten',$condiciones);
+			$this->db->reset_query();
+			$condiciones = array('idStatus' => '2');
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('statusreporte',$condiciones);
+			$respuesta = array('error' => FALSE,
+			'mensaje' => 'Reporte Actualizado Correctamente');
+			$this->response($respuesta);
+			return;
+		}
+		//ESTATUS 3 FINALIZADO
+		if(!empty($fechaRecepcion) && !empty($fechaAsignacion) && !empty($fechaReparacion)){
+			$condiciones = array('fecha_recepcion' => $fechaRecepcion,
+			'fecha_asignacion' => $fechaAsignacion,
+			'fecha_reparacion' => $fechaReparacion);
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('reportemanten',$condiciones);
+			$this->db->reset_query();
+			$condiciones = array('idStatus' => '3');
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('statusreporte',$condiciones);
+			$respuesta = array('error' => FALSE,
+			'mensaje' => 'Reporte Actualizado Correctamente');
+			$this->response($respuesta);
+			return;
+		}
+
 	}
 
 	public function cancelar_post(){
@@ -298,20 +346,62 @@ class Reporte extends REST_Controller {
 		$this->response($respuesta);
 	}
 
-	public function reportenuevos_get(){
+	public function reportenuevos_get($token){
+		if (empty($token)) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado.');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 1');
 		$this->response($query->result());
 	}
-	public function reporteatender_get(){
+	public function reporteasignados_get($token){
+		if(empty($token)){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_CONTROLLER::HTTP_UNAUTHORIZED);
+			return;			
+		}
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 2');
 		$this->response($query->result());
 	}
-	public function reportefinalizados_get(){
+	public function reportefinalizados_get($token){
+		if(empty($token)){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_CONTROLLER::HTTP_UNAUTHORIZED);
+			return;			
+		}
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 3');
 		$this->response($query->result());
 	}
-	public function reportecancelados_get(){
+	public function reportecancelados_get($token){
+		if(empty($token)){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_CONTROLLER::HTTP_UNAUTHORIZED);
+			return;			
+		}
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
 		$this->response($query->result());
+	}
+	public function genobservacion_post(){
+		$token = $this->post('token');
+		$folio = $this->post('folio');
+		$idUsuario = $this->post('idUsuario');
+		$observacion = $this->post('observacion');
+		if($token === "" || $idUsuario === ""){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
+		$condiciones = array('observacion_status' => $observacion);
+		$this->db->where('folio',$folio);
+		$resultado = $this->db->update('statusreporte',$condiciones);
+		$respuesta = array('error' => FALSE,
+						   'mensaje' => 'Se ha agregado correctamente la observación al reporte');
+		$this->response($respuesta);
 	}
 }
