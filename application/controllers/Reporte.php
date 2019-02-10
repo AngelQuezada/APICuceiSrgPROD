@@ -404,4 +404,11 @@ class Reporte extends REST_Controller {
 						   'mensaje' => 'Se ha agregado correctamente la observación al reporte');
 		$this->response($respuesta);
 	}
+	public function personal_get(){
+		$query = $this->db->query('SELECT id,nombre,a_paterno,a_materno FROM personal WHERE status = 3');
+		$this->response($query->result());
+	}
+	public function asignarencargado_post(){
+
+	}
 }

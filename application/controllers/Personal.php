@@ -38,6 +38,20 @@ class Personal extends REST_Controller
 			return;
 		}
 		$this->db->reset_query();
+		//VERIFICA SI EL PERSONAL ES ACTIVO
+		$this->db->select('status');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal')->result_array();
+		foreach ($query as $key) {
+			$status = $key['status'];
+			}
+			if($status == '2'){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'Usuario dado de Baja');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+			}
+		$this->db->reset_query();	
 		//GENERA EL TOKEN RANDOM Y SE INSERTA EN LA DB
 		$token = bin2hex(openssl_random_pseudo_bytes(20));
 		$condiciones = array('token' => $token );
@@ -82,6 +96,20 @@ class Personal extends REST_Controller
 								'mensaje' => 'No se envio correo');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 		}
+		//VERIFICA SI EL PERSONAL ES ACTIVO
+		$this->db->select('status');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal')->result_array();
+		foreach ($query as $key) {
+			$status = $key['status'];
+		 }
+		 if($status == '2'){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'Usuario dado de Baja');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		 }
+		$this->db->reset_query();	
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
 		$query = $this->db->get('personal');
@@ -97,5 +125,10 @@ class Personal extends REST_Controller
 		$respuesta = array('error' => FALSE,
 						   'mensaje' => 'Token eliminado');
 		$this->response($respuesta);
+	}
+	public function revokepersonal_post(){
+		$correo = $this->post('correo');
+		$token = $this->post('token');
+
 	}
 }
