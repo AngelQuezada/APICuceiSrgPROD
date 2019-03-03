@@ -281,6 +281,11 @@ class Reporte extends REST_Controller {
 			'fecha_reparacion' => $fechaReparacion);
 			$this->db->where('folio',$folio);
 			$resultado = $this->db->update('reportemanten',$condiciones);
+			$this->db->reset_query();
+			//RESETEO LA OBSERVACION		
+			$condiciones = array('observacion_status' => null);
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('statusreporte',$condiciones);
 			$respuesta = array('error' => FALSE,
 			'mensaje' => 'Reporte Actualizado Correctamente');
 			$this->response($respuesta);
@@ -295,6 +300,11 @@ class Reporte extends REST_Controller {
 			$resultado = $this->db->update('reportemanten',$condiciones);
 			$this->db->reset_query();
 			$condiciones = array('idStatus' => '2');
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('statusreporte',$condiciones);
+			$this->db->reset_query();
+			//RESETEO LA OBSERVACION		
+			$condiciones = array('observacion_status' => null);
 			$this->db->where('folio',$folio);
 			$resultado = $this->db->update('statusreporte',$condiciones);
 			$respuesta = array('error' => FALSE,
@@ -313,18 +323,21 @@ class Reporte extends REST_Controller {
 			$condiciones = array('idStatus' => '3');
 			$this->db->where('folio',$folio);
 			$resultado = $this->db->update('statusreporte',$condiciones);
+			$this->db->reset_query();
+			//RESETEO LA OBSERVACION		
+			$condiciones = array('observacion_status' => null);
+			$this->db->where('folio',$folio);
+			$resultado = $this->db->update('statusreporte',$condiciones);
 			$respuesta = array('error' => FALSE,
 			'mensaje' => 'Reporte Actualizado Correctamente');
 			$this->response($respuesta);
 			return;
 		}
-
 	}
 
 	public function cancelar_post(){
 		$token = $this->post('token');
 		$folio = $this->post('folio');
-
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
 		$query = $this->db->get('statusreporte')->result_array();
@@ -337,7 +350,6 @@ class Reporte extends REST_Controller {
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		 }
-		
 		$condiciones = array('idStatus' => '4');
 		$this->db->where('folio',$folio);
 		$resultado = $this->db->update('statusreporte',$condiciones);
@@ -409,6 +421,46 @@ class Reporte extends REST_Controller {
 		$this->response($query->result());
 	}
 	public function asignarencargado_post(){
-
+		$token = $this->post('token');
+		$folio = $this->post('folio');
+		$idUsuario = $this->post('idUsuario');
+		$idPersonal = $this->post('idPersonal');
+		if($token === "" || $idUsuario === ""){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
+		if($idPersonal == null){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No hay encargado por Asignar o el correo es invalido');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
+		$this->db->reset_query();
+		//VALIDA QUE NO SEA EL MISMO ENCARGADO
+		$this->db->select('idPersonal');
+		$this->db->where('folioReporte',$folio);
+		$query = $this->db->get('encargado')->result_array();
+		foreach ($query as $key) {
+			$idPersonalq = $key['idPersonal'];
+		}
+		if($idPersonalq == $idPersonal){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'Ya se ha asignado el encargado.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		$condiciones = array('folioReporte' => $folio,
+							 'idPersonal' => $idPersonal);
+		$resultado = $this->db->insert('encargado',$condiciones);
+		$respuesta = array('error' => FALSE,
+						   'mensaje' => 'Se ha asignado correctamente el encargado');
+		$this->response($respuesta);
+	}
+	public function getreporteencargado_get(){
+		$query = $this->db->query('SELECT personal.nombre,personal.a_paterno,personal.a_materno, encargado.folioReporte, encargado.id FROM personal INNER JOIN encargado ON personal.id=encargado.idPersonal');
+		$this->response($query->result());
 	}
 }

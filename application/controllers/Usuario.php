@@ -6,7 +6,6 @@ use Restserver\libraries\REST_Controller;
 
 class Usuario extends REST_Controller
 {
-	
 	public function __construct()
 	{
 		header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");

@@ -311,4 +311,125 @@ class Personal extends REST_Controller
 						   'mensaje' => 'Se ha otorgado los permisos Correctamente.');
 		$this->response($respuesta);
 	}
+
+
+	public function asignarrol_post(){
+		$correo = $this->post('correo');
+		$token = $this->post('token');
+		$idUsuario = $this->post('idUsuario');
+		$rol = $this->post('rol');
+		if($token === "" || $correo === "" || $idUsuario === ""){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
+		//VALIR SI SE RECIBE ROL
+		if($rol === ""){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No se recibio tipo de rol');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		//VALIDAR STATUS 3 ADMIN
+		$this->db->select('status');
+		$this->db->where('id',$idUsuario);
+		$query = $this->db->get('personal')->result_array();
+		foreach ($query as $key) {
+			$status = $key['status'];
+		}
+		if($status !== '3'){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'El Usuario NO Administrador del Sistema.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//VERIFICA SI EL CORREO NO EXISTE EN BD
+		$condiciones = array('correo' => $correo);
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if (!$existe) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El Correo NO existe.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//VERIFICA SI YA ES STATUS 3 ADMIN
+		$this->db->select('status');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal')->result_array();
+		foreach ($query as $key) {
+			$status = $key['status'];
+		}
+		if($status === '3'){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'El Usuario es Administrador del Sistema.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//VERIFICA SI YA ES STATUS 4 ENCARGADO
+		$this->db->select('status');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal')->result_array();
+		foreach ($query as $key) {
+			$status = $key['status'];
+		}
+		if($status === '4'){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'El Usuario ya es encargado.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//VERIFICA SI YA ES STATUS 5 SERVICIO SOCIAL
+		$this->db->select('status');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal')->result_array();
+		foreach ($query as $key) {
+			$status = $key['status'];
+		}
+		if($status === '5'){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'El Usuario ya cuenta con rol de Servicio Social.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//ACTUALIZA EL STATUS DEL PERSONAL
+		$condiciones = array('status' => $rol);
+		$this->db->where('correo',$correo);
+		$resultado = $this->db->update('personal',$condiciones);
+		$respuesta = array('error' => FALSE,
+						   'mensaje' => 'Se ha asignado correctamente el rol');
+		$this->response($respuesta);
+	}
+	// OBTENER ENCARGADOS
+	public function getidempleado_get($correo){
+		$condiciones = array('status' => '4',
+							'correo' => $correo);
+		$this->db->select('id');
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$informacion = $query->row();
+		if(!$informacion){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'No hay encargados o el correo no es valido.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->response($informacion);
+	}
+	// OBTENER SERVICIO SOCIAL
+	public function getidss_get(){
+		$condiciones = array('status' => '5');
+		$this->db->select('id,correo');
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$informacion = $query->row();
+		$this->response($informacion);
+	}
 }
