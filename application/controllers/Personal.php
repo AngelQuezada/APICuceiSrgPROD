@@ -26,7 +26,7 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
-		//VERIFICA SI EL CORREO NO EXISTE YA EN BD
+		//VERIFICA SI EL CORREO NO EXISTE EN BD
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
 		$query = $this->db->get('personal');
@@ -163,7 +163,20 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		 }
-		$this->db->reset_query();	
+		$this->db->reset_query();
+		//VERIFICA SI EL CORREO NO EXISTE EN BD
+		$condiciones = array('correo' => $correo);
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if (!$existe) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El Correo NO existe.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//ACTUALIZA EL STATUS DEL PERSONAL
 		$condiciones = array('status' => '2');
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('personal',$condiciones);
@@ -195,6 +208,18 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 				return;
 			}
+		$this->db->reset_query();
+		//VERIFICA SI EL CORREO NO EXISTE EN BD
+		$condiciones = array('correo' => $correo);
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if (!$existe) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El Correo NO existe.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
 		$this->db->reset_query();	
 		//VERIFICA SI EL PERSONAL ESTA DADO DE BAJA
 		$this->db->select('status');
@@ -244,6 +269,18 @@ class Personal extends REST_Controller
 			$respuesta = array('error' => TRUE,
 							'mensaje' => 'El Usuario NO Administrador del Sistema.');
 		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//VERIFICA SI EL CORREO NO EXISTE EN BD
+		$condiciones = array('correo' => $correo);
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if (!$existe) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El Correo NO existe.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
 		$this->db->reset_query();
