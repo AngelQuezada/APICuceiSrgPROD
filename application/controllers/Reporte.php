@@ -63,7 +63,7 @@ class Reporte extends REST_Controller {
 		$this->db->reset_query();
 
 		//SE PREPARAN LOS DATOS A INSERTAR
-		$ubicacionServicio = "".$this->post('modulo')." ".$this->post('piso')." ".$this->post('aula')."";
+		$ubicacionServicio = "MODULO: ".$this->post('modulo')." PISO: ".$this->post('piso')." AULA: ".$this->post('aula')."";
 		$datos = array('recibe' => $this->post('recibe'),
 					   'nombre' => $nombre,
 					   'a_paterno' => $aPaterno,
@@ -452,6 +452,20 @@ class Reporte extends REST_Controller {
 			return;
 		}
 		$this->db->reset_query();
+		//VALIDAR SI EL REPORTE YA FUE CANCELADO
+		$this->db->select('idStatus');
+		$this->db->where('folio',$folio);
+		$query = $this->db->get('statusreporte')->result_array();
+		foreach ($query as $key) {
+			$folioq = $key['idStatus'];
+		}
+		if($folioq == 4){
+		$respuesta = array('error' => TRUE,
+							'mensaje' => 'Ya se ha cancelado el reporte, no se puede asignar un encargado.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
 		$condiciones = array('folioReporte' => $folio,
 							 'idPersonal' => $idPersonal);
 		$resultado = $this->db->insert('encargado',$condiciones);
@@ -462,5 +476,40 @@ class Reporte extends REST_Controller {
 	public function getreporteencargado_get(){
 		$query = $this->db->query('SELECT personal.nombre,personal.a_paterno,personal.a_materno, encargado.folioReporte, encargado.id FROM personal INNER JOIN encargado ON personal.id=encargado.idPersonal');
 		$this->response($query->result());
+	}
+	public function grafico_get(){
+		$solicitud;
+		$asignados;
+		$finalizados;
+		$cancelados;
+		$this->db->where('idStatus','1');
+		$this->db->from('statusreporte');
+		$query = $this->db->count_all_results();
+		$solicitud = $query;
+		$this->db->reset_query();
+		$this->db->where('idStatus','2');
+		$this->db->from('statusreporte');
+		$query = $this->db->count_all_results();
+		$asignados = $query;
+		$this->db->reset_query();
+		$this->db->where('idStatus','3');
+		$this->db->from('statusreporte');
+		$query = $this->db->count_all_results();
+		$finalizados = $query;
+		$this->db->reset_query();
+		$this->db->where('idStatus','4');
+		$this->db->from('statusreporte');
+		$query = $this->db->count_all_results();
+		$cancelados = $query;
+		$this->db->reset_query();
+		$respuesta = array(array('Reporte'  => 'Solicitud',
+								 'Cantidad' => $solicitud),
+								array('Reporte' => 'Asignados',
+									  'Cantidad' => $asignados),
+								array('Reporte' => 'Finalizados',
+									  'Cantidad' => $finalizados),
+								array('Reporte' => 'Cancelados',
+									  'Cantidad' => $cancelados));
+		$this->response($respuesta);
 	}
 }
