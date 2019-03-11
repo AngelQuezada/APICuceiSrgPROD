@@ -169,25 +169,43 @@ class Reporte extends REST_Controller {
 	}
 	public function nuevos_get(){
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 1');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
 		$this->response($query->num_rows());
 	}
 	public function atender_get(){
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 2');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
 		$this->response($query->num_rows());
 	}
 	public function finalizado_get(){
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 3');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
 		$cant = $query->num_rows();
 		$this->response($cant);
 	}
 	public function cancelados_get(){
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
-                $cantidad;
-                if(!$query){
-                 $cantidad = 0;
-                 $this->response($cantidad);
-                 return;
-                }
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
 		$this->response($query->num_rows());
 	}
 	public function reportenpp_get($aPaterno,$aMaterno,$nombre,$folio){

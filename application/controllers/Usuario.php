@@ -23,6 +23,12 @@ class Usuario extends REST_Controller
 	}
 	public function totalusuarios_get(){
 		$query = $this->db->query('SELECT * FROM usuario');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
 		$this->response($query->num_rows());
 	}
 	public function banearusuario_post(){
