@@ -76,7 +76,7 @@ class Reporte extends REST_Controller {
 					   'descripcion_problema' => $this->post('descripcionProblema'),
 					   'idUsuario' => $id
 					);
-		$this->db->insert('reportemanten',$datos);
+		$this->db->insert('reporteManten',$datos);
 		//OBTENER EL ULTIMO FOLIO REGISTRADO
 		$ultimoFolio = $this->db->insert_id();
 		$this->db->reset_query();
@@ -87,7 +87,7 @@ class Reporte extends REST_Controller {
 									 'idUsuario' => $id,
 									 'idStatus' => $idStatus,
 									 'folio' => $ultimoFolio);
-		$this->db->insert('statusreporte',$datosEstatusReporte);
+		$this->db->insert('statusReporte',$datosEstatusReporte);
 
 		//SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
@@ -149,7 +149,7 @@ class Reporte extends REST_Controller {
 					   'descripcion_problema' => $this->post('option'),
 					   'idUsuario' => $id
 					);
-		$this->db->insert('reportemanten',$datos);
+		$this->db->insert('reporteManten',$datos);
 		//OBTENER EL ULTIMO FOLIO REGISTRADO
 		$ultimoFolio = $this->db->insert_id();
 		$this->response($ultimoFolio);
@@ -158,7 +158,7 @@ class Reporte extends REST_Controller {
 		$datosEstatusReporte = array('idUsuario' => $id,
 									 'idStatus' => '1',
 									 'folio' => $ultimoFolio);
-		$this->db->insert('statusreporte',$datosEstatusReporte);
+		$this->db->insert('statusReporte',$datosEstatusReporte);
 
 		//SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
@@ -178,7 +178,7 @@ class Reporte extends REST_Controller {
 		$this->response($query->num_rows());
 	}
 	public function atender_get(){
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 2');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 2');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;
@@ -188,7 +188,7 @@ class Reporte extends REST_Controller {
 		$this->response($query->num_rows());
 	}
 	public function finalizado_get(){
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 3');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 3');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;
@@ -199,7 +199,7 @@ class Reporte extends REST_Controller {
 		$this->response($cant);
 	}
 	public function cancelados_get(){
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 4');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;
@@ -211,7 +211,7 @@ class Reporte extends REST_Controller {
 	public function reportenpp_get($aPaterno,$aMaterno,$nombre,$folio){
 		$this->db->select('*');
 		$this->db->where('a_paterno',$aPaterno)->or_where('a_materno',$aMaterno)->or_where('nombre',$nombre)->or_where('folio',$folio);
-		$query = $this->db->get('reportemanten')->result();
+		$query = $this->db->get('reporteManten')->result();
 		if(empty($query)){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'No hay resultados');
@@ -223,7 +223,7 @@ class Reporte extends REST_Controller {
 	public function reporteindpp_get($folio){
 		$this->db->select('*');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('reportemanten')->result();
+		$query = $this->db->get('reporteManten')->result();
 		if(empty($query)){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'No hay resultados');
@@ -251,7 +251,7 @@ class Reporte extends REST_Controller {
 		
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusreporte')->result_array();
+		$query = $this->db->get('statusReporte')->result_array();
 		foreach ($query as $key) {
 			$id = $key['idStatus'];
 		 }
@@ -304,12 +304,12 @@ class Reporte extends REST_Controller {
 			'fecha_asignacion' => $fechaAsignacion,
 			'fecha_reparacion' => $fechaReparacion);
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('reportemanten',$condiciones);
+			$resultado = $this->db->update('reporteManten',$condiciones);
 			$this->db->reset_query();
 			//RESETEO LA OBSERVACION		
 			$condiciones = array('observacion_status' => null);
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('statusreporte',$condiciones);
+			$resultado = $this->db->update('statusReporte',$condiciones);
 			$respuesta = array('error' => FALSE,
 			'mensaje' => 'Reporte Actualizado Correctamente');
 			$this->response($respuesta);
@@ -321,16 +321,16 @@ class Reporte extends REST_Controller {
 			'fecha_asignacion' => $fechaAsignacion,
 			'fecha_reparacion' => $fechaReparacion);
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('reportemanten',$condiciones);
+			$resultado = $this->db->update('reporteManten',$condiciones);
 			$this->db->reset_query();
 			$condiciones = array('idStatus' => '2');
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('statusreporte',$condiciones);
+			$resultado = $this->db->update('statusReporte',$condiciones);
 			$this->db->reset_query();
 			//RESETEO LA OBSERVACION		
 			$condiciones = array('observacion_status' => null);
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('statusreporte',$condiciones);
+			$resultado = $this->db->update('statusReporte',$condiciones);
 			$respuesta = array('error' => FALSE,
 			'mensaje' => 'Reporte Actualizado Correctamente');
 			$this->response($respuesta);
@@ -342,16 +342,16 @@ class Reporte extends REST_Controller {
 			'fecha_asignacion' => $fechaAsignacion,
 			'fecha_reparacion' => $fechaReparacion);
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('reportemanten',$condiciones);
+			$resultado = $this->db->update('reporteManten',$condiciones);
 			$this->db->reset_query();
 			$condiciones = array('idStatus' => '3');
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('statusreporte',$condiciones);
+			$resultado = $this->db->update('statusReporte',$condiciones);
 			$this->db->reset_query();
 			//RESETEO LA OBSERVACION		
 			$condiciones = array('observacion_status' => null);
 			$this->db->where('folio',$folio);
-			$resultado = $this->db->update('statusreporte',$condiciones);
+			$resultado = $this->db->update('statusReporte',$condiciones);
 			$respuesta = array('error' => FALSE,
 			'mensaje' => 'Reporte Actualizado Correctamente');
 			$this->response($respuesta);
@@ -364,7 +364,7 @@ class Reporte extends REST_Controller {
 		$folio = $this->post('folio');
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusreporte')->result_array();
+		$query = $this->db->get('statusReporte')->result_array();
 		foreach ($query as $key) {
 			$id = $key['idStatus'];
 		 }
@@ -376,7 +376,7 @@ class Reporte extends REST_Controller {
 		 }
 		$condiciones = array('idStatus' => '4');
 		$this->db->where('folio',$folio);
-		$resultado = $this->db->update('statusreporte',$condiciones);
+		$resultado = $this->db->update('statusReporte',$condiciones);
 		$respuesta = array('error' => FALSE,
 						   'mensaje' => 'Se ha Cancelado correctamente el reporte');
 		$this->response($respuesta);
@@ -389,7 +389,7 @@ class Reporte extends REST_Controller {
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 1');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 1');
 		$this->response($query->result());
 	}
 	public function reporteasignados_get($token){
@@ -399,7 +399,7 @@ class Reporte extends REST_Controller {
 			$this->response($respuesta,REST_CONTROLLER::HTTP_UNAUTHORIZED);
 			return;			
 		}
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 2');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 2');
 		$this->response($query->result());
 	}
 	public function reportefinalizados_get($token){
@@ -409,7 +409,7 @@ class Reporte extends REST_Controller {
 			$this->response($respuesta,REST_CONTROLLER::HTTP_UNAUTHORIZED);
 			return;			
 		}
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 3');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 3');
 		$this->response($query->result());
 	}
 	public function reportecancelados_get($token){
@@ -419,7 +419,7 @@ class Reporte extends REST_Controller {
 			$this->response($respuesta,REST_CONTROLLER::HTTP_UNAUTHORIZED);
 			return;			
 		}
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 4');
 		$this->response($query->result());
 	}
 	public function genobservacion_post(){
@@ -435,7 +435,7 @@ class Reporte extends REST_Controller {
 		}
 		$condiciones = array('observacion_status' => $observacion);
 		$this->db->where('folio',$folio);
-		$resultado = $this->db->update('statusreporte',$condiciones);
+		$resultado = $this->db->update('statusReporte',$condiciones);
 		$respuesta = array('error' => FALSE,
 						   'mensaje' => 'Se ha agregado correctamente la observación al reporte');
 		$this->response($respuesta);
@@ -479,7 +479,7 @@ class Reporte extends REST_Controller {
 		//VALIDAR SI EL REPORTE YA FUE CANCELADO
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusreporte')->result_array();
+		$query = $this->db->get('statusReporte')->result_array();
 		foreach ($query as $key) {
 			$folioq = $key['idStatus'];
 		}
@@ -507,22 +507,22 @@ class Reporte extends REST_Controller {
 		$finalizados;
 		$cancelados;
 		$this->db->where('idStatus','1');
-		$this->db->from('statusreporte');
+		$this->db->from('statusReporte');
 		$query = $this->db->count_all_results();
 		$solicitud = $query;
 		$this->db->reset_query();
 		$this->db->where('idStatus','2');
-		$this->db->from('statusreporte');
+		$this->db->from('statusReporte');
 		$query = $this->db->count_all_results();
 		$asignados = $query;
 		$this->db->reset_query();
 		$this->db->where('idStatus','3');
-		$this->db->from('statusreporte');
+		$this->db->from('statusReporte');
 		$query = $this->db->count_all_results();
 		$finalizados = $query;
 		$this->db->reset_query();
 		$this->db->where('idStatus','4');
-		$this->db->from('statusreporte');
+		$this->db->from('statusReporte');
 		$query = $this->db->count_all_results();
 		$cancelados = $query;
 		$this->db->reset_query();

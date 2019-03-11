@@ -18,7 +18,7 @@ class Aula extends REST_Controller {
 	}
 
 	public function aulas_get($module_id,$floor_id){
-		$query = $this->db->query("SELECT aula_name FROM aulalist WHERE module_id='".$module_id."' AND floor_id='".$floor_id."'");
+		$query = $this->db->query("SELECT aula_name FROM aulaList WHERE module_id='".$module_id."' AND floor_id='".$floor_id."'");
 		
 			$this->response($query->result());
 	}

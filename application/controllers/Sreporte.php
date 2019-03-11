@@ -73,7 +73,7 @@ class Sreporte extends REST_Controller {
                         'hechos' => $this->post('hechos'),
                         'idUsuario' => $id);
 
-        $this->db->insert('reporte1seguridad',$datos);
+        $this->db->insert('reporte1Seguridad',$datos);
         //OBTENER EL ULTIMO FOLIO REGISTRADO
         $ultimoFolio = $this->db->insert_id();
         $this->db->reset_query();
@@ -86,7 +86,7 @@ class Sreporte extends REST_Controller {
                            'rodado' => $this->post('rodado'),
                            'folioReporte' => $ultimoFolio);
 
-        $this->db->insert('objetosreporte1seguridad',$objetosReporte);
+        $this->db->insert('objetosReporte1Seguridad',$objetosReporte);
         //SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
 							'mensaje' => 'Se ha realizado el reporte correctamente',

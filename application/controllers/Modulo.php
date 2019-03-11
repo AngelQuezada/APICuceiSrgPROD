@@ -19,7 +19,7 @@ class Modulo extends REST_Controller {
 	}
 
 	public function modulos_get(){
-		$query = $this->db->query("SELECT id,module_name FROM modulelist");
+		$query = $this->db->query("SELECT id,module_name FROM moduleList");
 			$this->response($query->result());
 	}
 }
