@@ -182,6 +182,12 @@ class Reporte extends REST_Controller {
 	}
 	public function cancelados_get(){
 		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 4');
+                $cantidad;
+                if(!$query){
+                 $cantidad = 0;
+                 $this->response($cantidad);
+                 return;
+                }
 		$this->response($query->num_rows());
 	}
 	public function reportenpp_get($aPaterno,$aMaterno,$nombre,$folio){
