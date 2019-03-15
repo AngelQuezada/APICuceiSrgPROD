@@ -168,7 +168,7 @@ class Reporte extends REST_Controller {
 		$this->response($respuesta);
 	}
 	public function nuevos_get(){
-		$query = $this->db->query('SELECT * FROM statusreporte WHERE idStatus = 1');
+		$query = $this->db->query('SELECT * FROM statusReporte WHERE idStatus = 1');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;
