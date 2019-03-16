@@ -94,5 +94,53 @@ class Sreporte extends REST_Controller {
 
 		$this->response($respuesta);  
     }
+    public function agregarobjeto_post(){
+        //SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
+		$token = $this->post('token');
+		$idUsuario = $this->post('idUsuario');
+		if($token === "" || $idUsuario === ""){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+        }
+        //VALIDAR SI EL TOKEN ENVIADO CORRESPONDE AL ID DEL USUARIO QUE SOLICITA
+		$condiciones = array('id' => $idUsuario,
+							 'token' => $token );
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if (!$existe) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'Usuario y token incorrectos');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+        }
+        $this->db->reset_query();
+        //SE PREPARAN LOS DATOS A INSERTAR
+        $objetosReporte = array('modelo' => $this->post('modelo'),
+                           'marca' => $this->post('marca'),
+                           'tipo' => $this->post('tipo'),
+                           'year' => $this->post('año'),
+                           'color' => $this->post('color'),
+                           'rodado' => $this->post('rodado'),
+                           'folioReporte' => $this->post('folio'));
+
+        $this->db->insert('objetosReporte1Seguridad',$objetosReporte);
+        //SE ENVIA LA RESPUESTA
+		$respuesta = array('error' => FALSE,
+							'mensaje' => 'Se ha realizado el reporte correctamente',
+							'folio' => $folio);
+
+		$this->response($respuesta);  
+    }
+    public function getsreporte_get(){
+        $query = $this->db->query('SELECT * FROM reporte1Seguridad');
+        $this->response($query->result());
+    }
+    public function getobjsreporte_get($folio){
+		$query = $this->db->query('SELECT * FROM objetosReporte1Seguridad WHERE folioReporte = '.$folio);
+        $this->response($query->result());
+    }
 
 }

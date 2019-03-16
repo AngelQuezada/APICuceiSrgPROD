@@ -536,4 +536,20 @@ class Reporte extends REST_Controller {
 									  'Cantidad' => $cancelados));
 		$this->response($respuesta);
 	}
+	public function getemail_get($folio){
+		//OBTIENE EL ID DEL USUARIO A PARTIR DEL FOLIO REGISTRADO
+		$this->db->select('idUsuario');
+		$this->db->where('folio',$folio);
+		$query = $this->db->get('reporteManten')->result_array();
+		foreach ($query as $key) {
+                   $id = $key['idUsuario'];
+		}
+		$this->db->reset_query();
+		//OBTENER EL CORREO A PARTIR DEL ID
+		$this->db->select('correo');
+		$this->db->where('id',$id);
+		$query = $this->db->get('usuario')->result();
+		
+		$this->response($query);
+	}
 }
