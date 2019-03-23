@@ -251,10 +251,13 @@ class Reporte extends REST_Controller {
 		
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusReporte')->result_array();
+		$query = $this->db->get('statusReporte')->result();
+		$id = $query;
+/*
 		foreach ($query as $key) {
 			$id = $key['idStatus'];
 		 }
+*/
 		 if($id == '4'){
 			$respuesta = array('error' => TRUE,
 			'mensaje' => 'Ya fue cancelado, no se puede modificar');
@@ -277,7 +280,7 @@ class Reporte extends REST_Controller {
 		if (empty($fechaRecepcion) && empty($fechaAsignacion) && empty($fechaReparacion)) {
 			$respuesta = array('error' => FALSE,
 												'mensaje' => 'No se realizó ningun cambio.' );
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			$this->response($respuesta);
 			return;
 		}
 		if (empty($fechaRecepcion) && !empty($fechaAsignacion)) {
