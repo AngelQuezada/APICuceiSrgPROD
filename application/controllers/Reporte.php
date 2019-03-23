@@ -253,11 +253,6 @@ class Reporte extends REST_Controller {
 		$this->db->where('folio',$folio);
 		$query = $this->db->get('statusReporte')->result();
 		$id = $query;
-/*
-		foreach ($query as $key) {
-			$id = $key['idStatus'];
-		 }
-*/
 		 if($id == '4'){
 			$respuesta = array('error' => TRUE,
 			'mensaje' => 'Ya fue cancelado, no se puede modificar');
@@ -279,7 +274,7 @@ class Reporte extends REST_Controller {
 		}
 		if (empty($fechaRecepcion) && empty($fechaAsignacion) && empty($fechaReparacion)) {
 			$respuesta = array('error' => FALSE,
-												'mensaje' => 'No se realizó ningun cambio.' );
+								'mensaje' => 'No se realizó ningun cambio.' );
 			$this->response($respuesta);
 			return;
 		}
@@ -367,10 +362,8 @@ class Reporte extends REST_Controller {
 		$folio = $this->post('folio');
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusReporte')->result_array();
-		foreach ($query as $key) {
-			$id = $key['idStatus'];
-		 }
+		$query = $this->db->get('statusReporte')->result();
+		$id = $query;
 		 if($id == '4'){
 			$respuesta = array('error' => TRUE,
 			'mensaje' => 'Ya fue cancelado');
@@ -468,10 +461,9 @@ class Reporte extends REST_Controller {
 		//VALIDA QUE NO SEA EL MISMO ENCARGADO
 		$this->db->select('idPersonal');
 		$this->db->where('folioReporte',$folio);
-		$query = $this->db->get('encargado')->result_array();
-		foreach ($query as $key) {
-			$idPersonalq = $key['idPersonal'];
-		}
+		$query = $this->db->get('encargado')->result();
+		$idPersonalq = $query;
+
 		if($idPersonalq == $idPersonal){
 			$respuesta = array('error' => TRUE,
 							'mensaje' => 'Ya se ha asignado el encargado.');
@@ -482,10 +474,8 @@ class Reporte extends REST_Controller {
 		//VALIDAR SI EL REPORTE YA FUE CANCELADO
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusReporte')->result_array();
-		foreach ($query as $key) {
-			$folioq = $key['idStatus'];
-		}
+		$query = $this->db->get('statusReporte')->result();
+		$folioq  = $query;
 		if($folioq == 4){
 		$respuesta = array('error' => TRUE,
 							'mensaje' => 'Ya se ha cancelado el reporte, no se puede asignar un encargado.');
@@ -543,10 +533,8 @@ class Reporte extends REST_Controller {
 		//OBTIENE EL ID DEL USUARIO A PARTIR DEL FOLIO REGISTRADO
 		$this->db->select('idUsuario');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('reporteManten')->result_array();
-		foreach ($query as $key) {
-                   $id = $key['idUsuario'];
-		}
+		$query = $this->db->get('reporteManten')->result();
+		$id = $query;
 		$this->db->reset_query();
 		//OBTENER EL CORREO A PARTIR DEL ID
 		$this->db->select('correo');
