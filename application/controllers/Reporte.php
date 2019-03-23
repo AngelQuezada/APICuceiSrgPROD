@@ -275,7 +275,7 @@ class Reporte extends REST_Controller {
 			return;
 		}
 		if (empty($fechaRecepcion) && empty($fechaAsignacion) && empty($fechaReparacion)) {
-			$respuesta = array('error' => TRUE,
+			$respuesta = array('error' => FALSE,
 												'mensaje' => 'No se realizó ningun cambio.' );
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
