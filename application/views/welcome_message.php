@@ -71,7 +71,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<h1>API CUCEI-SRG</h1>
 	<div id="body">
 		<p><b>Bienvenidos a la API de CUCEI SRG.</b></p>
-		<p><b>Proyecto Modular Desarrollado por Miguel Angel, Victor Dominguez & Dario Schmid.</b></p>
+		<p><b>Proyecto Modular Desarrollado por Miguel Angel Quezada, Victor Manuel Dominguez & Dario Daniel Schmid.</b></p>
 		<p><b>Alumnos de la Carrera de Ingeniería en Informática.</b></p>
 
 	</div>

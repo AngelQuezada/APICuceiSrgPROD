@@ -363,11 +363,10 @@ class Reporte extends REST_Controller {
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
 		$query = $this->db->get('statusReporte')->result();
-		$id = $query;
-		 if($id == '4'){
-			$respuesta = array('error' => TRUE,
+		 if($query === '4'){
+			$respuesta = array('error' => FALSE,
 			'mensaje' => 'Ya fue cancelado');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			$this->response($respuesta);
 			return;
 		 }
 		$condiciones = array('idStatus' => '4');
