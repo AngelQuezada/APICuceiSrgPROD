@@ -362,11 +362,15 @@ class Reporte extends REST_Controller {
 		$folio = $this->post('folio');
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusReporte')->result();
-		 if($query === '4'){
-			$respuesta = array('error' => FALSE,
+		$query = $this->db->get('statusReporte')->result_array();
+		$result;
+		foreach ($query as $key) {
+			$result = $key['idStatus'];
+		}
+		 if($result == '4'){
+			$respuesta = array('error' => TRUE,
 			'mensaje' => 'Ya fue cancelado');
-			$this->response($respuesta);
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		 }
 		$condiciones = array('idStatus' => '4');

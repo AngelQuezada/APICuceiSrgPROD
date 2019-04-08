@@ -358,16 +358,18 @@ class Personal extends REST_Controller
 		$this->response($respuesta);
 	}
 	// OBTENER ENCARGADOS
-	public function getidempleado_get($correo){
-		$condiciones = array('status' => '4',
-							'correo' => $correo);
-		$this->db->select('id');
+	public function getidempleado_get($aPaterno,$aMaterno,$nombre){
+		$condiciones = array('nombre' => $nombre,
+							'a_paterno' => $aPaterno,
+							'a_materno' => $aMaterno,
+							'nombre' => $Nombre);
+		$this->db->select('id,nombre,a_paterno,a_materno');
 		$this->db->where($condiciones);
-		$query = $this->db->get('personal');
+		$query = $this->db->get('encargadoList');
 		$informacion = $query->row();
 		if(!$informacion){
 			$respuesta = array('error' => TRUE,
-							'mensaje' => 'No hay encargados o el correo no es valido.');
+							'mensaje' => 'No hay encargados o el nombre no es valido.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
