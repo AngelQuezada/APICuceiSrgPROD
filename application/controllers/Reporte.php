@@ -360,13 +360,11 @@ class Reporte extends REST_Controller {
 	public function cancelar_post(){
 		$token = $this->post('token');
 		$folio = $this->post('folio');
-		$this->db->select('idStatus');
-		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusReporte')->result_array();
-		$result;
-		foreach ($query as $key) {
-			$result = $key['idStatus'];
-		}
+		//$this->db->select('idStatus');
+		//$this->db->where('folio',$folio);
+		$query = $this->db->query("SELECT idStatus FROM statusReporte WHERE folio = {$folio}");
+		$row = $query->row();
+		$result = $row->idStatus;
 		 if($result == '4'){
 			$respuesta = array('error' => TRUE,
 			'mensaje' => 'Ya fue cancelado');
