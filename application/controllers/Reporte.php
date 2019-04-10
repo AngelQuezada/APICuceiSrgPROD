@@ -360,8 +360,6 @@ class Reporte extends REST_Controller {
 	public function cancelar_post(){
 		$token = $this->post('token');
 		$folio = $this->post('folio');
-		//$this->db->select('idStatus');
-		//$this->db->where('folio',$folio);
 		$query = $this->db->query("SELECT idStatus FROM statusReporte WHERE folio = {$folio}");
 		$row = $query->row();
 		$result = $row->idStatus;
@@ -532,16 +530,14 @@ class Reporte extends REST_Controller {
 	}
 	public function getemail_get($folio){
 		//OBTIENE EL ID DEL USUARIO A PARTIR DEL FOLIO REGISTRADO
-		$this->db->select('idUsuario');
-		$this->db->where('folio',$folio);
-		$query = $this->db->get('reporteManten')->result();
-		$id = $query;
+		$query = $this->db->query("SELECT idUsuario FROM reporteManten WHERE folio = {$folio}");
+		$row = $query->row();
+		$id = $row->idUsuario;
 		$this->db->reset_query();
 		//OBTENER EL CORREO A PARTIR DEL ID
 		$this->db->select('correo');
 		$this->db->where('id',$id);
-		$query = $this->db->get('usuario')->result();
-		
-		$this->response($query);
+		$query2 = $this->db->get('usuario')->result();
+		$this->response($query2);
 	}
 }
