@@ -117,11 +117,20 @@ class Sreporte extends REST_Controller {
 			return;
         }
         $this->db->reset_query();
+        //VALIDAR SI FALTAN CAMPOS
+        if(empty($this->post('modelo')) || empty($this->post('marca')) || empty($this->post('tipo')) ||
+             empty($this->post('fecha')) || empty($this->post('color')) || empty($this->post('rodado')) ||
+             empty($this->post('folio')) ){
+                $respuesta = array('error' => TRUE,
+                'mensaje' => 'Verifique que todos los campos estén completos.');
+                $this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+                return;
+             }
         //SE PREPARAN LOS DATOS A INSERTAR
         $objetosReporte = array('modelo' => $this->post('modelo'),
                            'marca' => $this->post('marca'),
                            'tipo' => $this->post('tipo'),
-                           'year' => $this->post('año'),
+                           'year' => $this->post('fecha'),
                            'color' => $this->post('color'),
                            'rodado' => $this->post('rodado'),
                            'folioReporte' => $this->post('folio'));
@@ -129,8 +138,7 @@ class Sreporte extends REST_Controller {
         $this->db->insert('objetosReporte1Seguridad',$objetosReporte);
         //SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
-							'mensaje' => 'Se ha realizado el reporte correctamente',
-							'folio' => $folio);
+							'mensaje' => 'Se ha registrado el objeto correctamente');
 
 		$this->response($respuesta);  
     }
@@ -138,9 +146,162 @@ class Sreporte extends REST_Controller {
         $query = $this->db->query('SELECT * FROM reporte1Seguridad');
         $this->response($query->result());
     }
+    public function getsreportepa_get($folio){
+        $query = $this->db->query('SELECT * FROM reporte1Seguridad WHERE id = '.$folio);
+        $this->response($query->result());
+    }
     public function getobjsreporte_get($folio){
 		$query = $this->db->query('SELECT * FROM objetosReporte1Seguridad WHERE folioReporte = '.$folio);
         $this->response($query->result());
     }
+    //SEGUNDO REPORTE DE SEGURIDAD
+    public function getinstituciones_get(){
+        $query = $this->db->query('SELECT * FROM instituciones');
+        $this->response($query->result());
+    }
+    public function nuevors2_post(){
+        $token = $this->post('token');
+        $idUsuario = $this->post('idUsuario');
+        $institucion = $this->post('institucion');
+        $edad = $this->post('edad');
+        $codigo = $this->post('codigo');
+        $carrera = $this->post('carrera');
+        $email = $this->post('email');
+        $telefono = $this->post('telefono');
+        $fecha = $this->post('fecha');
+        $hora = $this->post('hora');
+        $lugar = $this->post('lugar');
+        $suceso = $this->post('suceso');
+        $robado = $this->post('robado');
+        $estatura = $this->post('estatura');
+        $apariencia = $this->post('apariencia');
+        $tez = $this->post('tez');
+        $cabello = $this->post('cabello');
+        $ojos = $this->post('ojos');
+        $cara = $this->post('cara');
+        $boca = $this->post('boca');
+        $ropa = $this->post('ropa');
+        $uso = $this->post('uso');
+        $edadAgresor = $this->post('edadAgresor');
+        $cicatrices = $this->post('cicatrices');
+        $tatuajes = $this->post('tatuajes');
+        $piercing = $this->post('piercing');
+        $señaParticular = $this->post('señaParticular');
+        $metodoHuida = $this->post('metodoHuida');
+        $observaciones = $this->post('observaciones');
 
+        //SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
+		$token = $this->post('token');
+		$idUsuario = $this->post('idUsuario');
+		if($token === "" || $idUsuario === ""){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No Autorizado');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
+		//VALIDAR SI EL TOKEN ENVIADO CORRESPONDE AL ID DEL USUARIO QUE SOLICITA
+		$condiciones = array('id' => $idUsuario,
+							 'token' => $token );
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if (!$existe) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'Usuario y token incorrectos');
+			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+			return;
+		}
+		//AQUI YA ESTA VALIDADO EL USUARIO
+        $this->db->reset_query();
+        //OBTENER ID Y NOMBRE A PARTIR DEL CORREO DEL USUARIO DADO
+		//VALIDAR A SU VEZ EL CORREO SEA VALIDO
+		$this->db->select('id,nombre,a_paterno,a_materno');
+		$this->db->where('correo',$email);
+		$query = $this->db->get('usuario')->result_array();
+		if (!$query) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El correo dado no esta registrado');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+
+		foreach ($query as $key) {
+				   $id = $key['id'];
+				   $nombre = $key['nombre'];
+		           $aPaterno = $key['a_paterno'];
+		           $aMaterno = $key['a_materno'];
+		}
+
+        $this->db->reset_query();
+        //OBTENER ID DE LA INSTITUCION"
+        $query = $this->db->query("SELECT id FROM instituciones WHERE institucion = '".$institucion."'");
+		$row = $query->row();
+        $idInstitucion = $row->id;
+        //SE PREPARAN LOS DATOS A INSERTAR
+        $this->db->reset_query();
+        $nombreCompleto = $nombre." ".$aPaterno." ".$aMaterno;
+        $datos = array('id' => NULL,
+                        'nombre' => $nombreCompleto,
+                        'edad' => $edad,
+                        'codigo' => $codigo,
+                        'carrera' => $carrera,
+                        'correo' => $email,
+                        'telefono' => $telefono,
+                        'fecha_incidente' => $fecha,
+                        'hora_incidente' => $hora,
+                        'lugar' => $lugar,
+                        'descripcion_suceso' => $suceso,
+                        'tipo_robo' => $robado,
+                        'estatura' => $estatura,
+                        'apariencia' => $apariencia,
+                        'tez' => $tez,
+                        'cabello' => $cabello,
+                        'ojos' => $ojos,
+                        'cara' => $cara,
+                        'boca' => $boca,
+                        'tipo_ropa' => $ropa,
+                        'objeto_rostro' => $uso,
+                        'edad_aprox' => $edad,
+                        'cicatriz' => $cicatrices,
+                        'tatuaje' => $tatuajes,
+                        'piercing' => $piercing,
+                        'otro' => $señaParticular,
+                        'metodo_huida' => $metodoHuida,
+                        'observaciones' => $observaciones,
+                        'idUsuario' => $idUsuario,
+                        'idInstitucion' => $idInstitucion);
+        $this->db->insert('reporte2Seguridad',$datos);
+        //SE ENVIA LA RESPUESTA
+		$respuesta = array('error' => FALSE,
+                            'mensaje' => 'Se ha realizado el reporte correctamente');
+        $this->response($respuesta);
+    }
+    public function getsreporte2_get(){
+        $query = $this->db->query('SELECT * FROM reporte2Seguridad');
+        $this->response($query->result());
+    }
+    public function getsreporte2pa_get($folio){
+        $query = $this->db->query('SELECT * FROM reporte2Seguridad WHERE id = '.$folio);
+        $this->response($query->result());
+    }
+    public function getnuevos1_get(){
+        $query = $this->db->query('SELECT * FROM reporte1Seguridad');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
+		$this->response($query->num_rows());
+    }
+    public function getnuevos2_get(){
+        $query = $this->db->query('SELECT * FROM reporte2Seguridad');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
+		$this->response($query->num_rows());
+    }
 }
