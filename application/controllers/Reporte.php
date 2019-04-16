@@ -439,60 +439,7 @@ class Reporte extends REST_Controller {
 		$query = $this->db->query('SELECT id,nombre,a_paterno,a_materno FROM personal WHERE status = 3');
 		$this->response($query->result());
 	}
-	public function asignarencargado_post(){
-		$token = $this->post('token');
-		$folio = $this->post('folio');
-		$idUsuario = $this->post('idUsuario');
-		$idPersonal = $this->post('idPersonal');
-		if($token === "" || $idUsuario === ""){
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'No Autorizado');
-			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
-			return;
-		}
-		if($idPersonal == null){
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'No hay encargado por Asignar o el correo es invalido');
-			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
-			return;
-		}
-		$this->db->reset_query();
-		//VALIDA QUE NO SEA EL MISMO ENCARGADO
-		$this->db->select('idPersonal');
-		$this->db->where('folioReporte',$folio);
-		$query = $this->db->get('encargado')->result();
-		$idPersonalq = $query;
-
-		if($idPersonalq == $idPersonal){
-			$respuesta = array('error' => TRUE,
-							'mensaje' => 'Ya se ha asignado el encargado.');
-		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		}
-		$this->db->reset_query();
-		//VALIDAR SI EL REPORTE YA FUE CANCELADO
-		$this->db->select('idStatus');
-		$this->db->where('folio',$folio);
-		$query = $this->db->get('statusReporte')->result();
-		$folioq  = $query;
-		if($folioq == 4){
-		$respuesta = array('error' => TRUE,
-							'mensaje' => 'Ya se ha cancelado el reporte, no se puede asignar un encargado.');
-		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		}
-		$this->db->reset_query();
-		$condiciones = array('folioReporte' => $folio,
-							 'idPersonal' => $idPersonal);
-		$resultado = $this->db->insert('encargado',$condiciones);
-		$respuesta = array('error' => FALSE,
-						   'mensaje' => 'Se ha asignado correctamente el encargado');
-		$this->response($respuesta);
-	}
-	public function getreporteencargado_get(){
-		$query = $this->db->query('SELECT personal.nombre,personal.a_paterno,personal.a_materno, encargado.folioReporte, encargado.id FROM personal INNER JOIN encargado ON personal.id=encargado.idPersonal');
-		$this->response($query->result());
-	}
+	
 	public function grafico_get(){
 		$solicitud;
 		$asignados;
