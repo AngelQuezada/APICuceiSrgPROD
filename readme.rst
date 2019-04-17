@@ -1,1 +1,1 @@
-:octocat: API CUCEI-SRG :octocat:
+API CUCEI-SRG
