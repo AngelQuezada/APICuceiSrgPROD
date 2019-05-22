@@ -23,14 +23,14 @@ class Sms extends REST_Controller {
 		$query = $this->db->get('personal')->result();
 		foreach($query as $key => $value) {
 			$data = ['phone' => $value->telefono, 'text' => 'Se ha registrado un nuevo reporte de mantenimiento.'];
-			$sid = 'ACa569d590ff5c25f921081974b1814fbe';
-			$token = '9930f5ae927125ce99de0f48ca548358';
+			$sid = 'ACbebe4fa7bc87018f990225d66fc4687e';
+			$token = 'e504241e490c30d9591c3a698cf6abc6';
 			$client = new Client($sid, $token);
 			$client->messages->create(
 			$data['phone'],
 			array(
 				// A Twilio phone number you purchased at twilio.com/console
-				'from' => '+12053468451',
+				'from' => '+17014015202',
 				// the body of the text message you'd like to send
 				'body' => $data['text']
 			)
