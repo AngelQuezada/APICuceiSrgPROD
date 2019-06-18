@@ -21,4 +21,8 @@ class Piso extends REST_Controller {
 		$query = $this->db->query("SELECT floor_id FROM aulaList WHERE module_id='".$module_id."'");
 			$this->response($query->result());
 	}
+	public function allpisos_get(){
+		$query = $this->db->query("SELECT * FROM floorList");
+			$this->response($query->result());
+	}
 }
