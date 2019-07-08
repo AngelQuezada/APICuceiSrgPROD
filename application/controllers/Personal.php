@@ -62,6 +62,49 @@ class Personal extends REST_Controller
 						   'token' => $token );
 		$this->response($respuesta);
 	}
+	public function nuevopersonal_post(){
+		$rol = $this->post('rol');
+		$nombre = $this->post('nombre');
+		$aPaterno = $this->post('aPaterno');
+		$aMaterno = $this->post('aMaterno');
+		$correo = $this->post('correo');
+
+		//VALIDA SI EL ARRAY ESTA VACIO
+		if (empty($this->post())) {
+			$respuesta = array('error' => TRUE,
+							   'mensaje' => 'No se envio la informacion necesaria');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		}
+		//VALIDA QUE LOS CAMPOS NECESARIOS ESTAN COMPLETADOS
+		if($correo === "" || $nombre === ""  || $aPaterno === "") {
+			$respuesta = array('error' => TRUE,
+							   'mensaje' => 'No se envio la informacion necesaria');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		}
+		//VALIDAR QUE EL CORREO YA EXISTE
+		$condiciones = array('correo' => $correo);
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if ($existe) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El Correo ya esta registrado.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+
+		//PREPARAN LOS DATOS
+		$datos = array('nombre' => $nombre,
+					   'a_paterno' =>$aPaterno,
+					   'a_materno' =>$aMaterno,
+					   'correo' => $correo,
+					   'status' => $rol);
+		$this->db->insert('personal',$datos);
+		$respuesta = array('error' => FALSE,
+						   'mensaje' => 'Se ha registrado el usuario');
+		$this->response($respuesta);
+	}
 	public function nuevo_post(){
 		$nombre = $this->post('nombre');
 		$aPaterno = $this->post('aPaterno');
