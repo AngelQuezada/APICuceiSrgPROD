@@ -6,7 +6,7 @@ use Restserver\libraries\REST_Controller;
 
 class Personal extends REST_Controller
 {
-	
+
 	public function __construct()
 	{
 		header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
@@ -51,7 +51,7 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 			}
-		$this->db->reset_query();	
+		$this->db->reset_query();
 		//GENERA EL TOKEN RANDOM Y SE INSERTA EN LA DB
 		$token = bin2hex(openssl_random_pseudo_bytes(20));
 		$condiciones = array('token' => $token );
@@ -152,7 +152,7 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		 }
-		$this->db->reset_query();	
+		$this->db->reset_query();
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
 		$query = $this->db->get('personal');
@@ -263,7 +263,7 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
-		$this->db->reset_query();	
+		$this->db->reset_query();
 		//VERIFICA SI EL PERSONAL ESTA DADO DE BAJA
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
@@ -283,7 +283,7 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		 }
-		$this->db->reset_query();	
+		$this->db->reset_query();
 		$condiciones = array('status' => '1');
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('personal',$condiciones);
@@ -426,5 +426,23 @@ class Personal extends REST_Controller
 		$query = $this->db->get('personal');
 		$informacion = $query->row();
 		$this->response($informacion);
+	}
+		public function verifypersonal_get($correo){
+		//VERIFICA SI EL CORREO EXISTE O NO EN BD
+		$condiciones = array('correo' => $correo);
+		$this->db->where($condiciones);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if ($existe) {
+			$respuesta = array('error' => FALSE,
+													'correo' => $correo);
+			$this->response($respuesta);
+			return;
+		}if(!$existe){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'El correo no existe.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
 	}
 }
