@@ -71,7 +71,8 @@ class Sreporte extends REST_Controller {
                         'hora' => $this->post('hora'),
                         'lugar' => $this->post('lugar'),
                         'hechos' => $this->post('hechos'),
-                        'idUsuario' => $id);
+                        'idUsuario' => $id,
+                        'correo' => $this->post('correo'));
 
         $this->db->insert('reporte1Seguridad',$datos);
         //OBTENER EL ULTIMO FOLIO REGISTRADO
