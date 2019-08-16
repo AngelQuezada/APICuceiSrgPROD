@@ -74,7 +74,8 @@ class Reporte extends REST_Controller {
 					   'anotacion_extra' => $this->post('anotacionExtra'),
 					   'descripcion_servicio' => $this->post('option'),
 					   'descripcion_problema' => $this->post('descripcionProblema'),
-					   'idUsuario' => $id
+					   'idUsuario' => $id,
+					   'correo' => $this->post('correo')
 					);
 		$this->db->insert('reporteManten',$datos);
 		//OBTENER EL ULTIMO FOLIO REGISTRADO

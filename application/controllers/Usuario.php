@@ -155,7 +155,29 @@ class Usuario extends REST_Controller
 	public function getsreporte2_get($correo){
         $query = $this->db->query("SELECT * FROM reporte2Seguridad WHERE correo = '$correo'");
         $this->response($query->result());
-    }
+	}
+	public function reportes3_get($idUsuario){
+		$query = $this->db->query("SELECT * FROM statusReporte WHERE idUsuario = $idUsuario");
+			$cantidad;
+			if(!$query){
+				$cantidad = 0;
+				$this->response($cantidad);
+				return;
+			}
+			$this->response($query->num_rows());
+	}
+	public function reportemanten_get($idUsuario){
+		$this->db->select('*');
+		$this->db->where('idUsuario',$idUsuario);
+		$query = $this->db->get('statusReporte')->result();
+		if(empty($query)){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'No hay resultados');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->response($query);
+	}
 	public function totalusuarios_get(){
 		$query = $this->db->query('SELECT * FROM usuario');
 		$cantidad;
