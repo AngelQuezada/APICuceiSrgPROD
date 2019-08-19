@@ -16,7 +16,6 @@ class Usuario extends REST_Controller
 	}
 	public function index(){
 	}
-	 //TODO: CUANDO SE CREE METODO CREAR USUARIO PONER COMO STATUS 1 POR DEFECTO
 	public function usuarios_get($correo){
 		$query = $this->db->query("SELECT id FROM usuario WHERE correo='".$correo."'");
 			$this->response($query->result());
@@ -290,14 +289,14 @@ class Usuario extends REST_Controller
 		foreach ($query as $key) {
 			$status = $key['status'];
 		 }
-		 if($status == '1'){
+		 if($status == '3'){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'El Usuario ya está dado de Alta.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		 }
 		$this->db->reset_query();	
-		$condiciones = array('status' => '1');
+		$condiciones = array('status' => '3');
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('usuario',$condiciones);
 		$respuesta = array('error' => FALSE,

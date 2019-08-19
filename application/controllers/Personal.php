@@ -142,9 +142,13 @@ class Personal extends REST_Controller
 		//VERIFICA SI EL PERSONAL ES ACTIVO
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result_array();
-		foreach ($query as $key) {
-			$status = $key['status'];
+		// $query = $this->db->get('personal')->result_array();
+		// foreach ($query as $key) {
+		// 	$status = $key['status'];
+		//  }
+		$query = $this->db->get('personal');
+		foreach ($query->result() as $row) {
+			$status = $row->status;
 		 }
 		 if($status == '2'){
 			$respuesta = array('error' => TRUE,
@@ -428,6 +432,19 @@ class Personal extends REST_Controller
 		$this->response($informacion);
 	}
 		public function verifypersonal_get($correo){
+
+		$this->db->select('token');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal');
+		$existe1 = $query->row();
+
+		if($existe1->token !== NULL){
+			$respuesta = array('error' => TRUE,
+			'mensaje' => 'Ya tiene una sesión activa, cierre sesión antes de continuar.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
 		//VERIFICA SI EL CORREO EXISTE O NO EN BD
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
