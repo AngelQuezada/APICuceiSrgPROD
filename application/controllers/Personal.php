@@ -432,33 +432,32 @@ class Personal extends REST_Controller
 		$this->response($informacion);
 	}
 		public function verifypersonal_get($correo){
-
+		//VERIFICA SI EL CORREO EXISTE O NO EN BD
+		$this->db->select('correo');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal');
+		$existe = $query->row();
+		if(!$existe){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'El correo no existe.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
+		//VERIFICA SI EL USUARIO YA ESTA LOGEADO EN OTRA COMPU O NAVEGADOR
 		$this->db->select('token');
 		$this->db->where('correo',$correo);
 		$query = $this->db->get('personal');
 		$existe1 = $query->row();
-
 		if($existe1->token !== NULL){
 			$respuesta = array('error' => TRUE,
 			'mensaje' => 'Ya tiene una sesión activa, cierre sesión antes de continuar.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
-		}
-		$this->db->reset_query();
-		//VERIFICA SI EL CORREO EXISTE O NO EN BD
-		$condiciones = array('correo' => $correo);
-		$this->db->where($condiciones);
-		$query = $this->db->get('personal');
-		$existe = $query->row();
-		if ($existe) {
+		}else{
 			$respuesta = array('error' => FALSE,
-													'correo' => $correo);
+								'correo' => $correo);
 			$this->response($respuesta);
-			return;
-		}if(!$existe){
-			$respuesta = array('error' => TRUE,
-							'mensaje' => 'El correo no existe.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
 	}
