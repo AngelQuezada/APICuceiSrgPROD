@@ -162,7 +162,7 @@ class Sreporte extends REST_Controller {
     }
     public function nuevors2_post(){
         $token = $this->post('token');
-        $idUsuario = $this->post('idUsuario');
+       //$idUsuario = $this->post('idUsuario');
         $institucion = $this->post('institucion');
         $edad = $this->post('edad');
         $codigo = $this->post('codigo');
@@ -201,37 +201,34 @@ class Sreporte extends REST_Controller {
 			return;
 		}
 		//VALIDAR SI EL TOKEN ENVIADO CORRESPONDE AL ID DEL USUARIO QUE SOLICITA
-		$condiciones = array('id' => $idUsuario,
-							 'token' => $token );
-		$this->db->where($condiciones);
-		$query = $this->db->get('personal');
-		$existe = $query->row();
-		if (!$existe) {
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'Usuario y token incorrectos');
-			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
-			return;
-		}
+		//$condiciones = array('id' => $idUsuario,
+		//					 'token' => $token );
+		//$this->db->where($condiciones);
+		//$query = $this->db->get('personal');
+		//$existe = $query->row();
+		//if (!$existe) {
+		//	$respuesta = array('error' => TRUE,
+		//						'mensaje' => 'Usuario y token incorrectos');
+		//	$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
+		//	return;
+		//}
 		//AQUI YA ESTA VALIDADO EL USUARIO
-        $this->db->reset_query();
+        //$this->db->reset_query();
         //OBTENER ID Y NOMBRE A PARTIR DEL CORREO DEL USUARIO DADO
 		//VALIDAR A SU VEZ EL CORREO SEA VALIDO
 		$this->db->select('id,nombre,a_paterno,a_materno');
 		$this->db->where('correo',$email);
-		$query = $this->db->get('usuario')->result_array();
-		if (!$query) {
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El correo dado no esta registrado');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		}
-
-		foreach ($query as $key) {
-				   $id = $key['id'];
-				   $nombre = $key['nombre'];
-		           $aPaterno = $key['a_paterno'];
-		           $aMaterno = $key['a_materno'];
-		}
+		$query = $this->db->get('usuario')->row();
+		//if (!$query) {
+		//	$respuesta = array('error' => TRUE,
+		//						'mensaje' => 'El correo dado no esta registrado');
+		//	$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		//	return;
+		//}
+		$idUsuario =  $query->id;
+		$nombre = $query->nombre;
+		$aPaterno = $query->a_paterno;
+		$aMaterno = $query->a_materno;
 
         $this->db->reset_query();
         //OBTENER ID DE LA INSTITUCION"
@@ -241,7 +238,7 @@ class Sreporte extends REST_Controller {
         //SE PREPARAN LOS DATOS A INSERTAR
         $this->db->reset_query();
         $nombreCompleto = $nombre." ".$aPaterno." ".$aMaterno;
-        $datos = array('id' => NULL,
+        $datos = array( 'id' => NULL,
                         'nombre' => $nombreCompleto,
                         'edad' => $edad,
                         'codigo' => $codigo,
