@@ -1,12 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
 require_once(APPPATH.'/libraries/REST_Controller.php');
 use Restserver\libraries\REST_Controller;
 
-class Encargado extends REST_Controller
-{
-	
+class Encargado extends REST_Controller {
 	public function __construct()
 	{
 		header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
@@ -15,10 +12,8 @@ class Encargado extends REST_Controller
 		parent::__construct();
 		$this->load->database();
 	}
-	public function index(){
-    }
-    
-    public function altaencargado_post(){
+	public function index(){}
+    public function altaencargado_post() {
         //SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
@@ -46,7 +41,6 @@ class Encargado extends REST_Controller
 		$nombre = $this->post('nombre');
 		$aPaterno = $this->post('aPaterno');
 		$aMaterno = $this->post('aMaterno');
-
 		$this->db->select('*');
 		$this->db->where('a_paterno',$aPaterno)->or_where('a_materno',$aMaterno)->or_where('nombre',$nombre);
 		$query = $this->db->get('encargadoList')->result();
@@ -56,7 +50,6 @@ class Encargado extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
-
 		//SE PREPARAN LOS DATOS A INSERTAR
 		$this->db->reset_query();
 		$datos = array('nombre' => $nombre,
@@ -67,15 +60,14 @@ class Encargado extends REST_Controller
 		//SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
 							'mensaje' => 'Se ha dado de alta el encargado correctamente.');
-
 		$this->response($respuesta);
 	}
-	
-	public function encargados_get(){
-		$query = $this->db->query('SELECT * FROM encargadoList');
+	public function encargados_get() {
+		$this->db->select('*');
+		$query = $this->db->get('encargadoList');
 		$this->response($query->result());
 	}
-	public function buscaencargado_get($aPaterno,$aMaterno,$nombre){
+	public function buscaencargado_get($aPaterno,$aMaterno,$nombre) {
 		$name = urldecode($nombre);
 		$this->db->select('*');
 		$this->db->like('a_paterno',$aPaterno)->or_like('a_materno',$aMaterno)->or_like('nombre',$name);
@@ -88,7 +80,7 @@ class Encargado extends REST_Controller
 		}
 		$this->response($query);
 	}
-	public function asignarencargado_post(){
+	public function asignarencargado_post() {
 		$token = $this->post('token');
 		$folio = $this->post('folio');
 		$idUsuario = $this->post('idUsuario');
@@ -122,8 +114,7 @@ class Encargado extends REST_Controller
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
 		$query = $this->db->get('statusReporte')->result();
-		$folioq  = $query;
-		if($folioq == 4){
+		if($query == 4){
 		$respuesta = array('error' => TRUE,
 							'mensaje' => 'Ya se ha cancelado el reporte, no se puede asignar un encargado.');
 		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
@@ -137,15 +128,15 @@ class Encargado extends REST_Controller
 						   'mensaje' => 'Se ha asignado correctamente el encargado.');
 		$this->response($respuesta);
 	}
-	public function getreporteencargado_get(){
+	public function getreporteencargado_get() {
 		$query = $this->db->query('SELECT r.folio, encargadoList.nombre,encargadoList.a_paterno,encargadoList.a_materno, encargadoList.id FROM encargadoList INNER JOIN encargado ON encargadoList.id=encargado.idPersonal INNER JOIN reporteManten r ON encargado.folioReporte=r.folio');
 		$this->response($query->result());
 	}
-	public function getreporte_get($folio){
+	public function getreporte_get($folio) {
 		$query = $this->db->query("SELECT encargadoList.id,encargadoList.nombre,encargadoList.a_paterno,encargadoList.a_materno FROM encargadoList INNER JOIN encargado ON encargadoList.id=encargado.idPersonal WHERE encargado.folioReporte={$folio}");
 		$this->response($query->result());
 	}
-	public function bajaencargado_post(){
+	public function bajaencargado_post() {
 		$token = $this->post('token');
 		$folio = $this->post('folio');
 		$idUsuario = $this->post('idUsuario');
@@ -167,8 +158,7 @@ class Encargado extends REST_Controller
 		$this->db->select('idStatus');
 		$this->db->where('folio',$folio);
 		$query = $this->db->get('statusReporte')->result();
-		$folioq  = $query;
-		if($folioq == 4){
+		if($query == 4){
 		$respuesta = array('error' => TRUE,
 							'mensaje' => 'Ya se ha cancelado el reporte, no se puede eliminar el encargado.');
 		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
@@ -182,5 +172,4 @@ class Encargado extends REST_Controller
 						   'mensaje' => 'Se ha quitado el encargado correctamente.');
 		$this->response($respuesta);
 	}
-	
 }

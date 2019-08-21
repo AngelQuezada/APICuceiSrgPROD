@@ -17,8 +17,7 @@ class Sms extends REST_Controller {
 	}
 
 	public function index(){}
-		
-	public function enviarsms_get(){
+	public function enviarsms_get() {
 		$this->db->select('telefono');
 		$query = $this->db->get('personal')->result();
 		foreach($query as $key => $value) {
@@ -40,7 +39,7 @@ class Sms extends REST_Controller {
 							'mensaje' => 'sms enviados correctamente');
 		return $this->response($arrayName);
     }
-    public function registrarnumero_post(){
+    public function registrarnumero_post() {
         //SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
@@ -74,7 +73,7 @@ class Sms extends REST_Controller {
 
 		$this->response($respuesta);
 	}
-	public function registrarnumerouser_post(){
+	public function registrarnumerouser_post() {
 		//SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
@@ -100,12 +99,11 @@ class Sms extends REST_Controller {
 		$this->db->reset_query();        
 		//SE PREPARAN LOS DATOS A INSERTAR
         $condiciones = array('telefono' => $this->post('telefono'));
-			$this->db->where('id',$idUsuario);
-			$resultado = $this->db->update('usuario',$condiciones);
+		$this->db->where('id',$idUsuario);
+		$resultado = $this->db->update('usuario',$condiciones);
 		//SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
 							'mensaje' => 'Se ha registrado el número de telefono correctamente.');
-
 		$this->response($respuesta);
 	}
 }

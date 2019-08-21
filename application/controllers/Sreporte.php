@@ -9,14 +9,11 @@ class Sreporte extends REST_Controller {
 		header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
 		header("Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding");
 		header("Access-Control-Allow-Origins: *");
-
 		parent::__construct();
 		$this->load->database();
 	}
-
     public function index(){}
-    
-    public function nuevors1_post(){
+    public function nuevors1_post() {
         //SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
@@ -44,20 +41,17 @@ class Sreporte extends REST_Controller {
         $correo = $this->post('correo');
 		$this->db->select('id,nombre,a_paterno,a_materno');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('usuario')->result_array();
+		$query = $this->db->get('usuario')->row();
 		if (!$query) {
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'El correo dado no esta registrado');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
-
-		foreach ($query as $key) {
-                   $id = $key['id'];
-                   $nombre = $key['nombre'];
-		           $aPaterno = $key['a_paterno'];
-		           $aMaterno = $key['a_materno'];
-        }
+        $id = $query->id;
+        $nombre = $query->nombre;
+        $aPaterno = $query->a_paterno;
+        $aMaterno = $query->a_materno;
         $this->db->reset_query();
         $nombreCompleto = $nombre." ".$aPaterno." ".$aMaterno;
         //PREPARAN LOS DATOS A INSERTAR
@@ -73,12 +67,10 @@ class Sreporte extends REST_Controller {
                         'hechos' => $this->post('hechos'),
                         'idUsuario' => $id,
                         'correo' => $this->post('correo'));
-
         $this->db->insert('reporte1Seguridad',$datos);
         //OBTENER EL ULTIMO FOLIO REGISTRADO
         $ultimoFolio = $this->db->insert_id();
         $this->db->reset_query();
-
         $objetosReporte = array('modelo' => $this->post('modelo'),
                            'marca' => $this->post('marca'),
                            'tipo' => $this->post('tipo'),
@@ -86,16 +78,14 @@ class Sreporte extends REST_Controller {
                            'color' => $this->post('color'),
                            'rodado' => $this->post('rodado'),
                            'folioReporte' => $ultimoFolio);
-
         $this->db->insert('objetosReporte1Seguridad',$objetosReporte);
         //SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
 							'mensaje' => 'Se ha realizado el reporte correctamente',
 							'folio' => $ultimoFolio);
-
-		$this->response($respuesta);  
+		$this->response($respuesta);
     }
-    public function agregarobjeto_post(){
+    public function agregarobjeto_post() {
         //SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
@@ -135,34 +125,37 @@ class Sreporte extends REST_Controller {
                            'color' => $this->post('color'),
                            'rodado' => $this->post('rodado'),
                            'folioReporte' => $this->post('folio'));
-
         $this->db->insert('objetosReporte1Seguridad',$objetosReporte);
         //SE ENVIA LA RESPUESTA
 		$respuesta = array('error' => FALSE,
 							'mensaje' => 'Se ha registrado el objeto correctamente');
-
 		$this->response($respuesta);  
     }
-    public function getsreporte_get(){
-        $query = $this->db->query('SELECT * FROM reporte1Seguridad');
+    public function getsreporte_get() {
+        $this->db->select('*');
+        $query = $this->db->get('reporte1Seguridad');
         $this->response($query->result());
     }
-    public function getsreportepa_get($folio){
-        $query = $this->db->query('SELECT * FROM reporte1Seguridad WHERE id = '.$folio);
+    public function getsreportepa_get($folio) {
+        $this->db->select('*');
+        $this->db->where('id', $folio);
+        $query = $this->db->get('reporte1Seguridad');
         $this->response($query->result());
     }
-    public function getobjsreporte_get($folio){
-		$query = $this->db->query('SELECT * FROM objetosReporte1Seguridad WHERE folioReporte = '.$folio);
+    public function getobjsreporte_get($folio) {
+        $this->db->select('*');
+        $this->db->where('folioReporte', $folio);
+        $query = $this->db->get('objetosReporte1Seguridad');
         $this->response($query->result());
     }
     //SEGUNDO REPORTE DE SEGURIDAD
-    public function getinstituciones_get(){
-        $query = $this->db->query('SELECT * FROM instituciones');
+    public function getinstituciones_get() {
+        $this->db->select('*');
+        $query = $this->db->get('instituciones');
         $this->response($query->result());
     }
-    public function nuevors2_post(){
+    public function nuevors2_post() {
         $token = $this->post('token');
-       //$idUsuario = $this->post('idUsuario');
         $institucion = $this->post('institucion');
         $edad = $this->post('edad');
         $codigo = $this->post('codigo');
@@ -200,31 +193,17 @@ class Sreporte extends REST_Controller {
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
-		//VALIDAR SI EL TOKEN ENVIADO CORRESPONDE AL ID DEL USUARIO QUE SOLICITA
-		//$condiciones = array('id' => $idUsuario,
-		//					 'token' => $token );
-		//$this->db->where($condiciones);
-		//$query = $this->db->get('personal');
-		//$existe = $query->row();
-		//if (!$existe) {
-		//	$respuesta = array('error' => TRUE,
-		//						'mensaje' => 'Usuario y token incorrectos');
-		//	$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
-		//	return;
-		//}
-		//AQUI YA ESTA VALIDADO EL USUARIO
-        //$this->db->reset_query();
         //OBTENER ID Y NOMBRE A PARTIR DEL CORREO DEL USUARIO DADO
 		//VALIDAR A SU VEZ EL CORREO SEA VALIDO
 		$this->db->select('id,nombre,a_paterno,a_materno');
 		$this->db->where('correo',$email);
 		$query = $this->db->get('usuario')->row();
-		//if (!$query) {
-		//	$respuesta = array('error' => TRUE,
-		//						'mensaje' => 'El correo dado no esta registrado');
-		//	$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-		//	return;
-		//}
+		if (!$query) {
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El correo dado no esta registrado');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
 		$idUsuario =  $query->id;
 		$nombre = $query->nombre;
 		$aPaterno = $query->a_paterno;
@@ -232,9 +211,10 @@ class Sreporte extends REST_Controller {
 
         $this->db->reset_query();
         //OBTENER ID DE LA INSTITUCION"
-        $query = $this->db->query("SELECT id FROM instituciones WHERE institucion = '".$institucion."'");
-		$row = $query->row();
-        $idInstitucion = $row->id;
+        $this->db->select('id');
+        $this->db->where('institucion', $institucion);
+        $query = $this->db->get('instituciones')->row();
+        $idInstitucion = $query->id;
         //SE PREPARAN LOS DATOS A INSERTAR
         $this->db->reset_query();
         $nombreCompleto = $nombre." ".$aPaterno." ".$aMaterno;
@@ -274,16 +254,20 @@ class Sreporte extends REST_Controller {
                             'mensaje' => 'Se ha realizado el reporte correctamente');
         $this->response($respuesta);
     }
-    public function getsreporte2_get(){
-        $query = $this->db->query('SELECT * FROM reporte2Seguridad');
+    public function getsreporte2_get() {
+        $this->db->select('*');
+        $query = $this->db->get('reporte2Seguridad');
         $this->response($query->result());
     }
-    public function getsreporte2pa_get($folio){
-        $query = $this->db->query('SELECT * FROM reporte2Seguridad WHERE id = '.$folio);
+    public function getsreporte2pa_get($folio) {
+        $this->db->select('*');
+        $this->db->where('id', $folio);
+        $query = $this->db->get('reporte2Seguridad');
         $this->response($query->result());
     }
-    public function getnuevos1_get(){
-        $query = $this->db->query('SELECT * FROM reporte1Seguridad');
+    public function getnuevos1_get() {
+        $this->db->select('*');
+        $query = $this->db->get('reporte1Seguridad');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;
@@ -292,8 +276,9 @@ class Sreporte extends REST_Controller {
 		}
 		$this->response($query->num_rows());
     }
-    public function getnuevos2_get(){
-        $query = $this->db->query('SELECT * FROM reporte2Seguridad');
+    public function getnuevos2_get() {
+        $this->db->select('*');
+        $query = $this->db->get('reporte2Seguridad');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;

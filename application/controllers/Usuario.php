@@ -1,6 +1,5 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
 require_once(APPPATH.'/libraries/REST_Controller.php');
 use Restserver\libraries\REST_Controller;
 
@@ -14,31 +13,30 @@ class Usuario extends REST_Controller
 		parent::__construct();
 		$this->load->database();
 	}
-	public function index(){
+	public function index(){}
+	public function usuarios_get($correo) {
+		$this->db->select('id');
+		$this->db->where('correo', $correo);
+		$query = $this->db->get('usuario');
+		$this->response($query->result());
 	}
-	public function usuarios_get($correo){
-		$query = $this->db->query("SELECT id FROM usuario WHERE correo='".$correo."'");
-			$this->response($query->result());
-	}
-	public function alumno_get($correo){
+	public function alumno_get($correo) {
 		if ($correo === null) {
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'No se envio correo');
+								'mensaje' => 'No se envio correo.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 		}
-		//VERIFICA SI EL PERSONAL ES ACTIVO
+		//VERIFICA SI EL ALUMNO ES ACTIVO
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('usuario')->result_array();
-		foreach ($query as $key) {
-			$status = $key['status'];
-		 }
-		 if($status == '2'){
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'Usuario dado de Baja');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		 }
+		$query = $this->db->get('usuario')->row();
+		$status = $query->status;
+		if($status == '2'){
+		$respuesta = array('error' => TRUE,
+							'mensaje' => 'Usuario dado de baja.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		return;
+		}
 		$this->db->reset_query();
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
@@ -46,12 +44,12 @@ class Usuario extends REST_Controller
 		$informacion = $query->row();
 		$this->response($informacion);
 	}
-	public function loginalumno_post(){
+	public function loginalumno_post() {
 		$correo = $this->post('correo');
 		//VERIFICA SI SE ENVIO CORREO
 		if ($correo === "") {
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'No Autorizado');
+								'mensaje' => 'No autorizado.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -70,16 +68,14 @@ class Usuario extends REST_Controller
 		//VERIFICA SI EL PERSONAL ES ACTIVO
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('usuario')->result_array();
-		foreach ($query as $key) {
-			$status = $key['status'];
-			}
-			if($status == '2'){
+		$query = $this->db->get('usuario')->row();
+		$status = $query->status;
+		if($status == '2'){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'Usuario dado de Baja');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
-			}
+		}
 		$this->db->reset_query();
 		//GENERA EL TOKEN RANDOM Y SE INSERTA EN LA DB
 		$token = bin2hex(openssl_random_pseudo_bytes(20));
@@ -91,12 +87,11 @@ class Usuario extends REST_Controller
 						   'token' => $token );
 		$this->response($respuesta);
 	}
-	public function nuevoalumno_post(){
+	public function nuevoalumno_post() {
 		$nombre = $this->post('nombre');
 		$aPaterno = $this->post('aPaterno');
 		$aMaterno = $this->post('aMaterno');
 		$correo = $this->post('correo');
-
 		//VALIDA SI EL ARRAY ESTA VACIO
 		if (empty($this->post())) {
 			$respuesta = array('error' => TRUE,
@@ -119,7 +114,7 @@ class Usuario extends REST_Controller
 						   'mensaje' => 'Se ha registrado el usuario');
 		$this->response($respuesta);
 	}
-	public function reportealumno_get($correo){
+	public function reportealumno_get($correo) {
 		$this->db->select('*');
 		$this->db->where('correo',$correo);
 		$query = $this->db->get('reporte1Seguridad')->result();
@@ -131,8 +126,10 @@ class Usuario extends REST_Controller
 		}
 		$this->response($query);
 	}
-	public function reportes_get($correo){
-	$query = $this->db->query("SELECT * FROM reporte1Seguridad WHERE correo = '$correo'");
+	public function reportes_get($correo) {
+		$this->db->select('*');
+		$this->db->where('correo', $correo);
+		$query = $this->db->get('reporte1Seguridad');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;
@@ -141,31 +138,37 @@ class Usuario extends REST_Controller
 		}
 		$this->response($query->num_rows());
 	}
-	public function reportes2_get($correo){
-		$query = $this->db->query("SELECT * FROM reporte2Seguridad WHERE correo = '$correo'");
-			$cantidad;
-			if(!$query){
-				$cantidad = 0;
-				$this->response($cantidad);
-				return;
-			}
-			$this->response($query->num_rows());
+	public function reportes2_get($correo) {
+		$this->db->select('*');
+		$this->db->where('correo', $correo);
+		$query = $this->db->get('reporte2Seguridad');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
+		$this->response($query->num_rows());
 	}
-	public function getsreporte2_get($correo){
-        $query = $this->db->query("SELECT * FROM reporte2Seguridad WHERE correo = '$correo'");
+	public function getsreporte2_get($correo) {
+		$this->db->select('*');
+		$this->db->where('correo', $correo);
+		$query = $this->db->get('reporte2Seguridad');
         $this->response($query->result());
 	}
-	public function reportes3_get($idUsuario){
-		$query = $this->db->query("SELECT * FROM statusReporte WHERE idUsuario = $idUsuario");
-			$cantidad;
-			if(!$query){
-				$cantidad = 0;
-				$this->response($cantidad);
-				return;
-			}
-			$this->response($query->num_rows());
+	public function reportes3_get($idUsuario) {
+		$this->db->select('*');
+		$this->db->where('idUsuario', $idUsuario);
+		$query = $this->db->get('statusReporte');
+		$cantidad;
+		if(!$query){
+			$cantidad = 0;
+			$this->response($cantidad);
+			return;
+		}
+		$this->response($query->num_rows());
 	}
-	public function reportemanten_get($idUsuario){
+	public function reportemanten_get($idUsuario) {
 		$this->db->select('*');
 		$this->db->where('idUsuario',$idUsuario);
 		$query = $this->db->get('statusReporte')->result();
@@ -177,8 +180,9 @@ class Usuario extends REST_Controller
 		}
 		$this->response($query);
 	}
-	public function totalusuarios_get(){
-		$query = $this->db->query('SELECT * FROM usuario');
+	public function totalusuarios_get() {
+		$this->db->select('*');
+		$query = $this->db->get('usuario');
 		$cantidad;
 		if(!$query){
 			$cantidad = 0;
@@ -187,43 +191,39 @@ class Usuario extends REST_Controller
 		}
 		$this->response($query->num_rows());
 	}
-	public function banearusuario_post(){
+	public function banearusuario_post() {
 		$correo = $this->post('correo');
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
 		if($token === "" || $correo === "" || $idUsuario === ""){
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'No Autorizado');
+								'mensaje' => 'No autorizado');
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
 		//VALIDAR STATUS 3 ADMIN
 		$this->db->select('status');
 		$this->db->where('id',$idUsuario);
-		$query = $this->db->get('personal')->result_array();
-		foreach ($query as $key) {
-				$status = $key['status'];
-			}
-			if($status !== '3'){
-				$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Usuario NO Administrador del Sistema.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-				return;
-			}
-			$this->db->reset_query();
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
+		if($status !== '3'){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'No tienes los suficientes privilegios.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->reset_query();
 		//VERIFICA SI EL USUARIO ESTA BANEADO
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('usuario')->result_array();
-		foreach ($query as $key) {
-			$status = $key['status'];
-		 }
-		 if($status == '2'){
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Usuario ya está dado de Baja.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		 }
+		$query = $this->db->get('usuario')->row();
+		$status = $query->status;
+		if($status == '2'){
+		$respuesta = array('error' => TRUE,
+							'mensaje' => 'El usuario ya está dado de Baja.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		return;
+		}
 		$this->db->reset_query();
 		//VERIFICA SI EL CORREO NO EXISTE EN BD
 		$condiciones = array('correo' => $correo);
@@ -232,7 +232,7 @@ class Usuario extends REST_Controller
 		$existe = $query->row();
 		if (!$existe) {
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Correo NO existe.');
+								'mensaje' => 'El correo no existe.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -245,7 +245,7 @@ class Usuario extends REST_Controller
 						   'mensaje' => 'Se ha dado de baja el usuario correctamente.');
 		$this->response($respuesta);
 	}
-	public function habilitarusuario_post(){
+	public function habilitarusuario_post() {
 		$correo = $this->post('correo');
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
@@ -259,16 +259,14 @@ class Usuario extends REST_Controller
 		//VALIDAR STATUS 3 ADMIN
 		$this->db->select('status');
 		$this->db->where('id',$idUsuario);
-		$query = $this->db->get('personal')->result_array();
-		foreach ($query as $key) {
-				$status = $key['status'];
-			}
-			if($status !== '3'){
-				$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Usuario NO Administrador del Sistema.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-				return;
-			}
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
+		if($status !== '3'){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'No tienes los suficientes privilegios.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
 		$this->db->reset_query();
 		//VERIFICA SI EL CORREO NO EXISTE EN BD
 		$condiciones = array('correo' => $correo);
@@ -277,7 +275,7 @@ class Usuario extends REST_Controller
 		$existe = $query->row();
 		if (!$existe) {
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Correo NO existe.');
+								'mensaje' => 'El correo no existe.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -285,25 +283,23 @@ class Usuario extends REST_Controller
 		//VERIFICA SI EL PERSONAL ESTA DADO DE BAJA
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('usuario')->result_array();
-		foreach ($query as $key) {
-			$status = $key['status'];
-		 }
-		 if($status == '3'){
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Usuario ya está dado de Alta.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		 }
+		$query = $this->db->get('usuario')->row();
+		$status = $query->status;
+		if($status == '3'){
+		$respuesta = array('error' => TRUE,
+							'mensaje' => 'El Usuario ya está dado de alta.');
+		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		return;
+		}
 		$this->db->reset_query();	
 		$condiciones = array('status' => '3');
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('usuario',$condiciones);
 		$respuesta = array('error' => FALSE,
-						   'mensaje' => 'El Usuario se ha habilitado Correctamente.');
+						   'mensaje' => 'El Usuario se ha habilitado correctamente.');
 		$this->response($respuesta);
 	}
-	public function deletetoken_post(){
+	public function deletetoken_post() {
 		$correo = $this->post('correo');
 		$token = $this->post('token');
 		$condiciones = array('token' => null );

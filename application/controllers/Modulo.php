@@ -10,17 +10,14 @@ class Modulo extends REST_Controller {
 		header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
 		header("Access-Control-Allow-Headers: Content-Type, Content-Length, Accept-Encoding");
 		header("Access-Control-Allow-Origins: *");
-
 		parent::__construct();
 		$this->load->database();
 	}
-
-	public function index(){
-	}
-
-	public function modulos_get(){
-		$query = $this->db->query("SELECT id,module_name FROM moduleList");
-			$this->response($query->result());
+	public function index(){}
+	public function modulos_get() {
+		$this->db->select('id, module_name');
+		$query = $this->db->get('moduleList');
+		$this->response($query->result());
 	}
 	public function altamodulo_post(){
 		//SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
@@ -50,7 +47,7 @@ class Modulo extends REST_Controller {
 		//VALIDAR SI EL MODULO YA EXISTE
 		$this->db->select('module_name');
 		$this->db->where('module_name',$modulo);
-		$query = $this->db->get('moduleList')->result_array();
+		$query = $this->db->get('moduleList')->result();
 		if($query){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'El módulo ya se encuentra registrado.');
@@ -65,7 +62,7 @@ class Modulo extends REST_Controller {
 							'mensaje' => 'Se ha registrado el módulo correctamente.');
 		$this->response($respuesta);
 	}
-	public function modmodulo_post(){
+	public function modmodulo_post() {
 		//SI NO SE ENVIA TOKEN NI EL ID DEL USUARIO
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
@@ -93,7 +90,7 @@ class Modulo extends REST_Controller {
 		//VALIDAR SI EL MODULO YA EXISTE
 		$this->db->select('module_name');
 		$this->db->where('module_name',$moduloMod);
-		$query = $this->db->get('moduleList')->result_array();
+		$query = $this->db->get('moduleList')->result();
 		if($query){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'El módulo ya se encuentra registrado.');
