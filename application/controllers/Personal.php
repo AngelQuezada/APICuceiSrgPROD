@@ -413,13 +413,38 @@ class Personal extends REST_Controller
 		$query = $this->db->get('personal');
 		$existe1 = $query->row();
 		if($existe1->token !== NULL){
-			$respuesta = array('error' => TRUE,
-			'mensaje' => 'Ya tiene una sesión activa, cierre sesión antes de continuar.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			$condiciones = array('token' => NULL );
+			$this->db->where('correo',$correo);
+			$resultado = $this->db->update('personal',$condiciones);
+			$respuesta = array('error' => FALSE,
+								'correo' => $correo);
+			$this->response($respuesta);
 			return;
 		}else{
 			$respuesta = array('error' => FALSE,
 								'correo' => $correo);
+			$this->response($respuesta);
+			return;
+		}
+	}
+	public function islogged_get($idUsuario, $token, $correo){
+		if($token == NULL){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'Has iniciado sesión en otro dispositivo.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}
+		$this->db->select('token');
+		$this->db->where('correo', $correo);
+		$query = $this->db->get('personal')->row();
+		$token_db = $query->token;
+		if(strncmp($token, $token_db, 5) !== 0){
+			$respuesta = array('error' => TRUE,
+							'mensaje' => 'Has iniciado sesión en otro dispositivo.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		}else{
+			$respuesta = array('error' => FALSE);
 			$this->response($respuesta);
 			return;
 		}
