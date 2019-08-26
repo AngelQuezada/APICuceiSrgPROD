@@ -13,7 +13,7 @@ class Usuario extends REST_Controller
 		parent::__construct();
 		$this->load->database();
 	}
-	public function index(){}
+	public function index_get(){}
 	public function usuarios_get($correo) {
 		$this->db->select('id');
 		$this->db->where('correo', $correo);
@@ -66,13 +66,14 @@ class Usuario extends REST_Controller
 		}
 		$this->db->reset_query();
 		//VERIFICA SI EL PERSONAL ES ACTIVO
-		$this->db->select('status');
+		$this->db->select('status, motivo_baja');
 		$this->db->where('correo',$correo);
 		$query = $this->db->get('usuario')->row();
 		$status = $query->status;
+		$motivo = $query->motivo_baja;
 		if($status == '2'){
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'Usuario dado de Baja');
+								'mensaje' => 'HAS SIDO DADO DE BAJA. RAZÓN: '.$motivo.'');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -194,6 +195,7 @@ class Usuario extends REST_Controller
 	public function banearusuario_post() {
 		$correo = $this->post('correo');
 		$token = $this->post('token');
+		$motivo = $this->post('motivo');
 		$idUsuario = $this->post('idUsuario');
 		if($token === "" || $correo === "" || $idUsuario === ""){
 			$respuesta = array('error' => TRUE,
@@ -201,15 +203,14 @@ class Usuario extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
-		//VALIDAR STATUS 3 ADMIN
-		$this->db->select('status');
-		$this->db->where('id',$idUsuario);
-		$query = $this->db->get('personal')->row();
-		$status = $query->status;
-		if($status !== '3'){
+		//VERIFICA SI EL CORREO NO EXISTE EN BD
+		$this->db->select('*');
+		$this->db->where('correo', $correo);
+		$query = $this->db->get('usuario')->row();
+		if(!$query) {
 			$respuesta = array('error' => TRUE,
-							'mensaje' => 'No tienes los suficientes privilegios.');
-		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+								'mensaje' => 'El correo no existe.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
 		$this->db->reset_query();
@@ -225,20 +226,10 @@ class Usuario extends REST_Controller
 		return;
 		}
 		$this->db->reset_query();
-		//VERIFICA SI EL CORREO NO EXISTE EN BD
-		$condiciones = array('correo' => $correo);
-		$this->db->where($condiciones);
-		$query = $this->db->get('usuario');
-		$existe = $query->row();
-		if (!$existe) {
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El correo no existe.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		}
-		$this->db->reset_query();
+		
 		//ACTUALIZA EL STATUS DEL PERSONAL
-		$condiciones = array('status' => '2');
+		$condiciones = array('status' => '2',
+							'motivo_baja' => $motivo);
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('usuario',$condiciones);
 		$respuesta = array('error' => FALSE,
@@ -256,18 +247,6 @@ class Usuario extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
-		//VALIDAR STATUS 3 ADMIN
-		$this->db->select('status');
-		$this->db->where('id',$idUsuario);
-		$query = $this->db->get('personal')->row();
-		$status = $query->status;
-		if($status !== '3'){
-			$respuesta = array('error' => TRUE,
-							'mensaje' => 'No tienes los suficientes privilegios.');
-		$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		}
-		$this->db->reset_query();
 		//VERIFICA SI EL CORREO NO EXISTE EN BD
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
@@ -292,7 +271,8 @@ class Usuario extends REST_Controller
 		return;
 		}
 		$this->db->reset_query();	
-		$condiciones = array('status' => '3');
+		$condiciones = array('status' => '3',
+							'motivo_baja' => NULL);
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('usuario',$condiciones);
 		$respuesta = array('error' => FALSE,

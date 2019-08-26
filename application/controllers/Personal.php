@@ -13,7 +13,7 @@ class Personal extends REST_Controller
 		parent::__construct();
 		$this->load->database();
 	}
-	public function index(){}
+	public function index_get(){}
 	public function login_post() {
 		$correo = $this->post('correo');
 		//VERIFICA SI SE ENVIO CORREO
@@ -36,13 +36,14 @@ class Personal extends REST_Controller
 		}
 		$this->db->reset_query();
 		//VERIFICA SI EL PERSONAL ES ACTIVO
-		$this->db->select('status');
+		$this->db->select('status, motivo_baja');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		$status = $query;
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
+		$motivo = $query->motivo_baja;
 		if($status == '2'){
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'Usuario dado de Baja');
+								'mensaje' => 'HAS SIDO DADO DE BAJA. RAZÓN: '.$motivo.'');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -134,8 +135,8 @@ class Personal extends REST_Controller
 		//VERIFICA SI EL PERSONAL ES ACTIVO
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		if($query == '2'){
+		$query = $this->db->get('personal')->row();
+		if($query->status == '2'){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'Usuario dado de Baja');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
@@ -162,34 +163,23 @@ class Personal extends REST_Controller
 		$correo = $this->post('correo');
 		$token = $this->post('token');
 		$idUsuario = $this->post('idUsuario');
+		$motivo = $this->post('motivo');
 		if($token === "" || $correo === "" || $idUsuario === ""){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'No Autorizado');
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
-		//VALIDAR STATUS 3 ADMIN
-		$this->db->select('status');
-		$this->db->where('id',$idUsuario);
-		$query = $this->db->get('personal')->result();
-		if($query !== '3'){
+		//VERIFICA SI EL CORREO NO ES EL MIO
+		$this->db->select('token');
+		$this->db->where('correo', $correo);
+		$query = $this->db->get('personal')->row();
+		if($query->token == $token){
 			$respuesta = array('error' => TRUE,
-							'mensaje' => 'No tienes privilegios suficientes.');
+								'mensaje' => 'No puedes darte de baja a ti mismo.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
-		$this->db->reset_query();
-		//VERIFICA SI EL PERSONAL ESTA DADO DE BAJA
-		$this->db->select('status');
-		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		if($query == '2'){
-			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Usuario ya está dado de Baja.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		 }
-		$this->db->reset_query();
 		//VERIFICA SI EL CORREO NO EXISTE EN BD
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
@@ -202,8 +192,21 @@ class Personal extends REST_Controller
 			return;
 		}
 		$this->db->reset_query();
+		//VERIFICA SI EL PERSONAL ESTA DADO DE BAJA
+		$this->db->select('status');
+		$this->db->where('correo',$correo);
+		$query = $this->db->get('personal')->row();
+		if($query->status == '2'){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El Usuario ya está dado de Baja.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		 }
+		$this->db->reset_query();
+		
 		//ACTUALIZA EL STATUS DEL PERSONAL
-		$condiciones = array('status' => '2');
+		$condiciones = array('status' => '2',
+							'motivo_baja' => $motivo);
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('personal',$condiciones);
 		$respuesta = array('error' => FALSE,
@@ -220,17 +223,6 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_UNAUTHORIZED);
 			return;
 		}
-		//VALIDAR STATUS 3 ADMIN
-		$this->db->select('status');
-		$this->db->where('id',$idUsuario);
-		$query = $this->db->get('personal')->result();
-		if($query !== '3'){
-			$respuesta = array('error' => TRUE,
-							'mensaje' => 'El Usuario NO Administrador del Sistema.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		}
-		$this->db->reset_query();
 		//VERIFICA SI EL CORREO NO EXISTE EN BD
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
@@ -238,7 +230,7 @@ class Personal extends REST_Controller
 		$existe = $query->row();
 		if (!$existe) {
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Correo NO existe.');
+								'mensaje' => 'El Correo no existe.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -246,8 +238,8 @@ class Personal extends REST_Controller
 		//VERIFICA SI EL PERSONAL ESTA DADO DE BAJA
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		$status = $query;
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
 		 if($status == '1'){
 			$respuesta = array('error' => TRUE,
 								'mensaje' => 'El Usuario ya está dado de Alta.');
@@ -260,12 +252,19 @@ class Personal extends REST_Controller
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		 }
+		 if($status == '6'){
+			$respuesta = array('error' => TRUE,
+								'mensaje' => 'El Usuario es Administrador.');
+			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+			return;
+		 }
 		$this->db->reset_query();
-		$condiciones = array('status' => '1');
+		$condiciones = array('status' => '1',
+							 'motivo_baja' => NULL);
 		$this->db->where('correo',$correo);
 		$resultado = $this->db->update('personal',$condiciones);
 		$respuesta = array('error' => FALSE,
-						   'mensaje' => 'El Usuario se ha habilitado Correctamente.');
+						   'mensaje' => 'El Usuario se ha habilitado Correctamente; Asigne un Rol.');
 		$this->response($respuesta);
 	}
 
@@ -288,17 +287,17 @@ class Personal extends REST_Controller
 			return;
 		}
 		//VALIDAR STATUS 3 ADMIN
-		$this->db->select('status');
-		$this->db->where('id',$idUsuario);
-		$query = $this->db->get('personal')->result();
-		$status = $query;
-		if($status !== '3'){
-			$respuesta = array('error' => TRUE,
-							'mensaje' => 'El Usuario NO Administrador del Sistema.');
-			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
-			return;
-		}
-		$this->db->reset_query();
+		// $this->db->select('status');
+		// $this->db->where('id',$idUsuario);
+		// $query = $this->db->get('personal')->result();
+		// $status = $query;
+		// if($status !== '3'){
+		// 	$respuesta = array('error' => TRUE,
+		// 					'mensaje' => 'El Usuario NO Administrador del Sistema.');
+		// 	$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
+		// 	return;
+		// }
+		// $this->db->reset_query();
 		//VERIFICA SI EL CORREO NO EXISTE EN BD
 		$condiciones = array('correo' => $correo);
 		$this->db->where($condiciones);
@@ -306,7 +305,7 @@ class Personal extends REST_Controller
 		$existe = $query->row();
 		if (!$existe) {
 			$respuesta = array('error' => TRUE,
-								'mensaje' => 'El Correo NO existe.');
+								'mensaje' => 'El Correo no existe.');
 			$this->response($respuesta,REST_Controller::HTTP_BAD_REQUEST);
 			return;
 		}
@@ -314,8 +313,8 @@ class Personal extends REST_Controller
 		//VERIFICA SI YA ES STATUS 3 ADMIN
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		$status = $query;
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
 		if($status === '3'){
 			$respuesta = array('error' => TRUE,
 							'mensaje' => 'El Usuario es Administrador del Sistema, no se puede asignar otro rol.');
@@ -326,8 +325,8 @@ class Personal extends REST_Controller
 		//VERIFICA SI YA ES STATUS 4 ENCARGADO
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		$status = $query;
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
 		if($status === '4'){
 			$respuesta = array('error' => TRUE,
 							'mensaje' => 'El Usuario ya es encargado.');
@@ -338,8 +337,8 @@ class Personal extends REST_Controller
 		//VERIFICA SI YA ES STATUS 5 SERVICIO SOCIAL
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		$status = $query;
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
 		if($status === '5'){
 			$respuesta = array('error' => TRUE,
 							'mensaje' => 'El Usuario ya cuenta con rol de Servicio Social.');
@@ -350,8 +349,8 @@ class Personal extends REST_Controller
 		//VERIFICA SI YA ES STATUS 6 SEGURIDAD
 		$this->db->select('status');
 		$this->db->where('correo',$correo);
-		$query = $this->db->get('personal')->result();
-		$status = $query;
+		$query = $this->db->get('personal')->row();
+		$status = $query->status;
 		if($status === '6'){
 			$respuesta = array('error' => TRUE,
 							'mensaje' => 'El Usuario es Administrador del Sistema, no se puede asignar otro rol.');
